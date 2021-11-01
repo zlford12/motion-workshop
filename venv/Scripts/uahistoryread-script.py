@@ -1,4 +1,4 @@
-#!C:\Users\zlfor\PycharmProjects\SetLimits\venv\Scripts\python.exe
+#!C:\Users\zlfor\PycharmProjects\CommissionTool\venv\Scripts\python.exe
 # EASY-INSTALL-ENTRY-SCRIPT: 'opcua==0.98.13','console_scripts','uahistoryread'
 import re
 import sys
