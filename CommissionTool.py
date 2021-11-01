@@ -290,54 +290,49 @@ class AxisPositioning:
 
     @staticmethod
     def insert_limits():
-        """Position And Limits"""
-        global negative_limit_entry
-        global positive_limit_entry
-        global set_position_entry
 
         try:
-            negative_limit_entry.delete(0, 100)
+            user_interface.negative_limit_entry.delete(0, 100)
             neglimit = str(client.get_node(nodeid="ns=12;s=Motion.AxisSet.LocalControl.Axis"
-                                                  + str(AxisNumber)
+                                                  + str(motion_control.axis_number)
                                                   + ".Limits.PositionLimitNegative").get_value())
-            negative_limit_entry.insert(0, neglimit)
+            user_interface.negative_limit_entry.insert(0, neglimit)
 
-            positive_limit_entry.delete(0, 100)
+            user_interface.positive_limit_entry.delete(0, 100)
             poslimit = str(client.get_node(nodeid="ns=12;s=Motion.AxisSet.LocalControl.Axis"
-                                                  + str(AxisNumber)
+                                                  + str(motion_control.axis_number)
                                                   + ".Limits.PositionLimitPositive").get_value())
-            positive_limit_entry.insert(0, poslimit)
+            user_interface.positive_limit_entry.insert(0, poslimit)
 
-            set_position_entry.delete(0, 100)
+            user_interface.set_position_entry.delete(0, 100)
         except:
             return
 
     @staticmethod
     def setlimits():
-        global negative_limit_entry
-        global positive_limit_entry
 
-        neglimit = ua.DataValue(ua.Variant(float(negative_limit_entry.get()), ua.VariantType.Double))
-        poslimit = ua.DataValue(ua.Variant(float(positive_limit_entry.get()), ua.VariantType.Double))
+        neglimit = ua.DataValue(ua.Variant(float(user_interface.negative_limit_entry.get()), ua.VariantType.Double))
+        poslimit = ua.DataValue(ua.Variant(float(user_interface.positive_limit_entry.get()), ua.VariantType.Double))
+
         client.get_node(nodeid="ns=12;s=Motion.AxisSet.LocalControl.Axis"
-                               + str(AxisNumber)
-                               + ".Limits.PositionLimitNegative").set_attribute(ua.AttributeIds.Value, neglimit)
+                               + str(motion_control.axis_number)
+                               + ".Limits.PositionLimitNegative"
+                        ).set_attribute(ua.AttributeIds.Value, neglimit)
         client.get_node(nodeid="ns=12;s=Motion.AxisSet.LocalControl.Axis"
-                               + str(AxisNumber)
-                               + ".Limits.PositionLimitPositive").set_attribute(ua.AttributeIds.Value, poslimit)
+                               + str(motion_control.axis_number)
+                               + ".Limits.PositionLimitPositive"
+                        ).set_attribute(ua.AttributeIds.Value, poslimit)
 
     @staticmethod
     def setposition():
-        global AxisNumber
-        global set_position_entry
 
         node = client.get_node(nodeid="ns=12;s=Motion.AxisSet.LocalControl.Axis"
-                                      + str(AxisNumber)).get_referenced_nodes()
+                                      + str(motion_control.axis_number)).get_referenced_nodes()
 
         for child in node:
             if str(child).find("s=Physical") > -1:
                 drivenode = str(child)
-                client.get_node(nodeid=drivenode + '.ParameterSet."S-0-0052"').set_value(int(set_position_entry.get()) * 10000, ua.VariantType.Int32)
+                client.get_node(nodeid=drivenode + '.ParameterSet."S-0-0052"').set_value(int(user_interface.set_position_entry.get()) * 10000, ua.VariantType.Int32)
                 client.get_node(nodeid=drivenode + '.ParameterSet."S-0-0447"').set_value(3, ua.VariantType.Int16)
                 client.get_node(nodeid=drivenode + '.ParameterSet."S-0-0447"').set_value(0, ua.VariantType.Int16)
 
@@ -408,10 +403,6 @@ class UserInterface:
         self.currentposlabel.grid(row=2, column=2, padx=10, sticky=N)
 
     def body2(self):
-        global Master1
-        global Master2
-        global Slave1
-        global Slave2
 
         for child in self.body.winfo_children():
             child.destroy()
@@ -422,24 +413,24 @@ class UserInterface:
         selected_slave2 = StringVar()
 
         try:
-            selected_master1.set(Master1)
+            selected_master1.set(motion_control.master1)
         except:
-            Master1 = ""
+            motion_control.master1 = ""
 
         try:
-            selected_master2.set(Master2)
+            selected_master2.set(motion_control.master2)
         except:
-            Master2 = ""
+            motion_control.master2 = ""
 
         try:
-            selected_slave1.set(Slave1)
+            selected_slave1.set(motion_control.slave1)
         except:
-            Slave1 = ""
+            motion_control.slave1 = ""
 
         try:
-            selected_slave2.set(Slave2)
+            selected_slave2.set(motion_control.slave2)
         except:
-            Slave2 = ""
+            motion_control.slave2 = ""
 
         mastermenu1 = OptionMenu(self.body, selected_master1, *motion_control.axis_list, command=motion_control.gear_in_master1)
         mastermenu1.configure(bg="#999999", highlightthickness=0)
@@ -551,17 +542,16 @@ class UserInterface:
         self.status_display.grid(row=0, column=2, padx=10)
 
     def draw_footer(self):
-        global AxisNumber
 
         self.footer.configure(bg="#555555")
         self.footer.grid(row=2, column=0, columnspan=3, sticky=S+E+W)
 
         try:
-            AxisNumber
+            motion_control.axis_number
         except NameError:
-            AxisNumber = None
+            motion_control.axis_number = None
 
-        if AxisNumber is None:
+        if motion_control.axis_number is None:
             speed_unit = "unit?"
             accel_unit = "unit?"
             fillspd = ""
@@ -601,7 +591,6 @@ class UserInterface:
         accel_label.grid(row=1, column=1, padx=10, pady=10)
 
     def draw_left_side(self):
-        """Create Left Side"""
         btnx = 12
         btny = 2
 
