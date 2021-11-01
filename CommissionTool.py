@@ -56,6 +56,11 @@ class ConnectionManagement:
 class MotionControl:
     def __init__(self):
         self.axis_list = [""]
+        self.axis_number = None
+        self.master1 = None
+        self.master2 = None
+        self.slave1 = None
+        self.slave2 = None
 
     @staticmethod
     def clear_error():
@@ -65,7 +70,9 @@ class MotionControl:
             messagebox.showerror(title="OPC Error", message="Failure Writing Data\nto OPC UA Server")
 
     def get_axes(self):
+
         user_interface.draw_right_side(self.axis_list)
+
         # global right_side
         # global AxisList
         # AxisList = [""]
@@ -80,62 +87,79 @@ class MotionControl:
         #
         # draw_right_side(AxisList)
 
-    @staticmethod
-    def set_axis_number(axis_name):
-        global AxisList
-        global AxisNumber
+    def set_axis_number(self, axis_name):
 
         if axis_name != "":
-            AxisNumber = AxisList.index(axis_name) + 1
-            AxisPositioning.insert_limits()
+            self.axis_number = self.axis_list.index(axis_name) + 1
+            axis_positioning.insert_limits()
 
         user_interface.draw_footer()
 
-    @staticmethod
-    def get_axis_info():
-        global AxisNumber
+    def get_axis_info(self):
 
-        positive_limit = client.get_node(nodeid="ns=12;s=Motion.AxisSet.LocalControl.Axis"
-                                            + str(AxisNumber) + ".Limits.PositionLimitPositive").get_value()
-        negative_limit = client.get_node(nodeid="ns=12;s=Motion.AxisSet.LocalControl.Axis"
-                                            + str(AxisNumber) + ".Limits.PositionLimitNegative").get_value()
-        speed_unit = client.get_node(nodeid="ns=12;s=Motion.AxisSet.LocalControl.Axis"
-                                            + str(AxisNumber) + ".Units.Velocity").get_value()
-        accel_unit = client.get_node(nodeid="ns=12;s=Motion.AxisSet.LocalControl.Axis" + str(AxisNumber)
-                                            + ".Units.Acceleration").get_value()
-        max_speed = client.get_node(nodeid="ns=12;s=Motion.AxisSet.LocalControl.Axis"
-                                            + str(AxisNumber) + ".Limits.VelocityLimitBipolar").get_value()
-        max_accel = client.get_node(nodeid="ns=12;s=Motion.AxisSet.LocalControl.Axis"
-                                            + str(AxisNumber) + ".Limits.AccelerationLimitBipolar").get_value()
+        positive_limit = client.get_node(
+            nodeid="ns=12;s=Motion.AxisSet.LocalControl.Axis"
+                   + str(self.axis_number)
+                   + ".Limits.PositionLimitPositive"
+        ).get_value()
+
+        negative_limit = client.get_node(
+            nodeid="ns=12;s=Motion.AxisSet.LocalControl.Axis"
+                   + str(self.axis_number)
+                   + ".Limits.PositionLimitNegative"
+        ).get_value()
+
+        speed_unit = client.get_node(
+            nodeid="ns=12;s=Motion.AxisSet.LocalControl.Axis"
+                   + str(self.axis_number)
+                   + ".Units.Velocity"
+        ).get_value()
+
+        accel_unit = client.get_node(
+            nodeid="ns=12;s=Motion.AxisSet.LocalControl.Axis"
+                   + str(self.axis_number)
+                   + ".Units.Acceleration"
+        ).get_value()
+
+        max_speed = client.get_node(
+            nodeid="ns=12;s=Motion.AxisSet.LocalControl.Axis"
+                   + str(self.axis_number)
+                   + ".Limits.VelocityLimitBipolar"
+        ).get_value()
+
+        max_accel = client.get_node(
+            nodeid="ns=12;s=Motion.AxisSet.LocalControl.Axis"
+                   + str(self.axis_number)
+                   + ".Limits.AccelerationLimitBipolar"
+        ).get_value()
 
         return positive_limit, negative_limit, speed_unit, accel_unit, max_speed, max_accel
 
-    @staticmethod
-    def get_position():
-        global AxisNumber
-        global current_position_label
+    def get_position(self):
 
         try:
-            AxisNumber
+            self.axis_number
         except NameError:
-            AxisNumber = None
+            self.axis_number = None
 
-        if AxisNumber is None:
+        if self.axis_number is None:
             return
         else:
-            current_position = str(client.get_node(nodeid="ns=12;s=Motion.AxisSet.LocalControl.Axis"
-                                                         + str(AxisNumber)
-                                                         + ".ActualValues.ActualPosition").get_value())
+            current_position = str(
+                client.get_node(
+                    nodeid="ns=12;s=Motion.AxisSet.LocalControl.Axis"
+                           + str(self.axis_number)
+                           + ".ActualValues.ActualPosition"
+                ).get_value()
+            )
 
             try:
-                current_position_label.configure(text=current_position)
+                user_interface.current_position_label.configure(text=current_position)
             except:
                 return
 
-    @staticmethod
-    def jog_positive():
-        global AxisNumber
-        (positive_limit, _, _, _, max_speed, max_accel) = MotionControl.get_axis_info()
+    def jog_positive(self):
+        (positive_limit, _, _, _, max_speed, max_accel) = self.get_axis_info()
 
         speed = float(user_interface.jog_speed_entry.get())
         if speed > max_speed:
@@ -150,13 +174,11 @@ class MotionControl:
         client.get_node(nodeid="ns=2;s=Application.CommissioningVar.rCommissionJog_Position").set_value((positive_limit - 10), ua.VariantType.Float)
         client.get_node(nodeid="ns=2;s=Application.CommissioningVar.rCommissionJog_Velocity").set_value(speed, ua.VariantType.Float)
         client.get_node(nodeid="ns=2;s=Application.CommissioningVar.rCommissionJog_Accel").set_value(accel, ua.VariantType.Float)
-        client.get_node(nodeid="ns=2;s=Application.CommissioningVar.iCommissionJog_AxisNo").set_value(AxisNumber, ua.VariantType.Int16)
+        client.get_node(nodeid="ns=2;s=Application.CommissioningVar.iCommissionJog_AxisNo").set_value(self.axis_number, ua.VariantType.Int16)
         client.get_node(nodeid="ns=2;s=Application.CommissioningVar.bCommissionJog_Enable").set_value(True)
 
-    @staticmethod
-    def jog_negative():
-        global AxisNumber
-        (_, negative_limit, _, _, max_speed, max_accel) = MotionControl.get_axis_info()
+    def jog_negative(self):
+        (_, negative_limit, _, _, max_speed, max_accel) = self.get_axis_info()
 
         speed = float(user_interface.jog_speed_entry.get())
         if speed > max_speed:
@@ -171,25 +193,20 @@ class MotionControl:
         client.get_node(nodeid="ns=2;s=Application.CommissioningVar.rCommissionJog_Position").set_value((negative_limit + 10), ua.VariantType.Float)
         client.get_node(nodeid="ns=2;s=Application.CommissioningVar.rCommissionJog_Velocity").set_value(speed, ua.VariantType.Float)
         client.get_node(nodeid="ns=2;s=Application.CommissioningVar.rCommissionJog_Accel").set_value(accel, ua.VariantType.Float)
-        client.get_node(nodeid="ns=2;s=Application.CommissioningVar.iCommissionJog_AxisNo").set_value(AxisNumber, ua.VariantType.Int16)
+        client.get_node(nodeid="ns=2;s=Application.CommissioningVar.iCommissionJog_AxisNo").set_value(self.axis_number, ua.VariantType.Int16)
         client.get_node(nodeid="ns=2;s=Application.CommissioningVar.bCommissionJog_Enable").set_value(True)
 
-    @staticmethod
-    def stop_jog():
-        global AxisNumber
+    def stop_jog(self):
 
         client.get_node(nodeid="ns=2;s=Application.CommissioningVar.bCommissionJog_Enable").set_value(False)
         client.get_node(nodeid="ns=2;s=Application.CommissioningVar.bCommissionJog_Stop").set_value(False)
-        client.get_node(nodeid="ns=2;s=Application.CommissioningVar.iCommissionJog_AxisNo").set_value(AxisNumber, ua.VariantType.Int16)
+        client.get_node(nodeid="ns=2;s=Application.CommissioningVar.iCommissionJog_AxisNo").set_value(self.axis_number, ua.VariantType.Int16)
         client.get_node(nodeid="ns=2;s=Application.CommissioningVar.bCommissionJog_Stop").set_value(True)
 
-    @staticmethod
-    def go_to_position():
-        global AxisNumber
-        (positive_limit, negative_limit, _, _, max_speed, max_accel) = MotionControl.get_axis_info()
-        global go_to_entry
+    def go_to_position(self):
+        (positive_limit, negative_limit, _, _, max_speed, max_accel) = self.get_axis_info()
 
-        go_to_position = float(go_to_entry.get())
+        go_to_position = float(user_interface.go_to_entry.get())
         if go_to_position > (positive_limit - 10):
             go_to_position = positive_limit
         if go_to_position < (negative_limit + 10):
@@ -208,53 +225,37 @@ class MotionControl:
         client.get_node(nodeid="ns=2;s=Application.CommissioningVar.rCommissionJog_Position").set_value(go_to_position, ua.VariantType.Float)
         client.get_node(nodeid="ns=2;s=Application.CommissioningVar.rCommissionJog_Velocity").set_value(speed, ua.VariantType.Float)
         client.get_node(nodeid="ns=2;s=Application.CommissioningVar.rCommissionJog_Accel").set_value(accel, ua.VariantType.Float)
-        client.get_node(nodeid="ns=2;s=Application.CommissioningVar.iCommissionJog_AxisNo").set_value(AxisNumber, ua.VariantType.Int16)
+        client.get_node(nodeid="ns=2;s=Application.CommissioningVar.iCommissionJog_AxisNo").set_value(self.axis_number, ua.VariantType.Int16)
         client.get_node(nodeid="ns=2;s=Application.CommissioningVar.bCommissionJog_Enable").set_value(True)
 
-    @staticmethod
-    def gear_in_master1(master):
-        global AxisList
-        global AxisNumber
-        global Master1
+    def gear_in_master1(self, master):
 
-        Master1 = master
-        master_number = AxisList.index(master) + 1
+        self.master1 = master
+        master_number = self.axis_list.index(master) + 1
 
         client.get_node(nodeid="ns=2;s=Application.CommissioningVar.bCommissioningGearIn_1").set_value(False)
         client.get_node(nodeid="ns=2;s=Application.CommissioningVar.iCommissioningGearInMaster_1").set_value(master_number, ua.VariantType.Int16)
 
-    @staticmethod
-    def gear_in_master2(master):
-        global AxisList
-        global AxisNumber
-        global Master2
+    def gear_in_master2(self, master):
 
-        Master2 = master
-        master_number = AxisList.index(master) + 1
+        self.master2 = master
+        master_number = self.axis_list.index(master) + 1
 
         client.get_node(nodeid="ns=2;s=Application.CommissioningVar.bCommissioningGearIn_2").set_value(False)
         client.get_node(nodeid="ns=2;s=Application.CommissioningVar.iCommissioningGearInMaster_2").set_value(master_number, ua.VariantType.Int16)
 
-    @staticmethod
-    def gear_in_slave1(slave):
-        global AxisList
-        global AxisNumber
-        global Slave1
+    def gear_in_slave1(self, slave):
 
-        Slave1 = slave
-        slave_number = AxisList.index(slave) + 1
+        self.slave1 = slave
+        slave_number = self.axis_list.index(slave) + 1
 
         client.get_node(nodeid="ns=2;s=Application.CommissioningVar.bCommissioningGearIn_1").set_value(False)
         client.get_node(nodeid="ns=2;s=Application.CommissioningVar.iCommissioningGearInSlave_1").set_value(slave_number, ua.VariantType.Int16)
 
-    @staticmethod
-    def gear_in_slave2(slave):
-        global AxisList
-        global AxisNumber
-        global Slave2
+    def gear_in_slave2(self, slave):
 
-        Slave2 = slave
-        slave_number = AxisList.index(slave) + 1
+        self.slave2 = slave
+        slave_number = self.axis_list.index(slave) + 1
 
         client.get_node(nodeid="ns=2;s=Application.CommissioningVar.bCommissioningGearIn_2").set_value(False)
         client.get_node(nodeid="ns=2;s=Application.CommissioningVar.iCommissioningGearInSlave_2").set_value(slave_number, ua.VariantType.Int16)
@@ -653,6 +654,7 @@ class UserInterface:
         user_interface.root.update()
         user_interface.root.destroy()
         exit()
+
 
 def main():
     # Initialize Tkinter
