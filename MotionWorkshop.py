@@ -362,7 +362,6 @@ class UserInterface:
         self.jog_speed_entry = None
         self.jog_accel_entry = None
 
-
     def body1(self):
         btnx = 10
         btny = 4

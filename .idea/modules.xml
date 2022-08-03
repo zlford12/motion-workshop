@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/CommissionTool.iml" filepath="$PROJECT_DIR$/.idea/CommissionTool.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/MotionWorkshop.iml" filepath="$PROJECT_DIR$/.idea/MotionWorkshop.iml" />
     </modules>
   </component>
 </project>
