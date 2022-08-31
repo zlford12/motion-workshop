@@ -1,7 +1,7 @@
 import threading
 from tkinter import *
 from tkinter import messagebox  # Entry
-from background_tasks import ConnectionManagement
+from background_tasks import ConnectionManagement, ApplicationSettings
 
 
 class UserInterface:
@@ -25,11 +25,9 @@ class UserInterface:
         self.footer = Frame(self.root)
 
         # Header Elements
-        self.status_display = None
 
         # Footer Elements
-        self.jog_speed_entry = None
-        self.jog_accel_entry = None
+        self.connection_status_display = None
 
         # Draw UI
         self.draw_header()
@@ -72,9 +70,9 @@ class UserInterface:
             text="Reset", width=button_x, height=button_y, command=self.dummy_function, bg="#999999")
         clear_error_button.grid(row=0, column=100, sticky=E, padx=10, pady=10)
 
-        self.status_display = Label(self.header)
-        self.status_display.configure(text="Disconnected", bg="#FF0000")
-        self.status_display.grid(row=0, column=2, padx=10)
+        self.connection_status_display = Label(self.header)
+        self.connection_status_display.configure(text="Disconnected", bg="#FF0000")
+        self.connection_status_display.grid(row=0, column=2, padx=10)
 
     def draw_body(self):
         self.body.configure(bg="#000000")
@@ -138,9 +136,9 @@ class UserInterface:
     def update_status_display(self):
         false_boolean = False
         if false_boolean:
-            self.status_display.configure(text="Connected", bg="#00FF00")
+            self.connection_status_display.configure(text="Connected", bg="#00FF00")
         else:
-            self.status_display.configure(text="Disconnected", bg="#FF0000")
+            self.connection_status_display.configure(text="Disconnected", bg="#FF0000")
 
     def cleanup(self):
         self.root.update()
@@ -167,6 +165,7 @@ def main():
 
 if __name__ == "__main__":
     # Create Global Instances of Class Objects
+    application_settings = ApplicationSettings()
     connection_manager = ConnectionManagement()
     user_interface = UserInterface()
 

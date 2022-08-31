@@ -1,5 +1,6 @@
 from opcua import Client
 import time
+import xml.etree.ElementTree
 
 
 class ConnectionManagement:
@@ -41,3 +42,15 @@ class ConnectionManagement:
         except Exception as e:
             # messagebox.showerror(title="OPC Error", message="Failed to\nDisconnect")
             print(e)
+
+
+class ApplicationSettings:
+    def __init__(self):
+        self.settings_file = "ApplicationSettings.xml"
+        self.settings = {}
+
+        self.read_xml()
+
+    def read_xml(self):
+        for item in xml.etree.ElementTree.parse(self.settings_file).getroot():
+            self.settings[item.tag] = item.text
