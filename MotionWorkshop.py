@@ -1,65 +1,28 @@
-from tkinter import *
-from tkinter import messagebox, Entry
-from opcua import Client, ua
 import threading
-import time
-
-
-class ConnectionManagement:
-    def __init__(self):
-        self.connection_monitor_thread = threading.Thread(target=self.is_connected)
-        self.connection_desired = False
-        self.connection_okay = False
-        self.close_requested = False
-        self.connection_loop_time = 0.5
-
-    def start_connection_monitor_thread(self):
-        self.connection_monitor_thread.start()
-
-    def is_connected(self):
-        while not self.close_requested:
-            try:
-                client.get_node("i=2253")
-                self.connection_okay = True
-            except Exception as e:
-                self.connection_okay = False
-                print(e)
-
-            time.sleep(self.connection_loop_time)
-
-    def open_client(self):
-        try:
-            if not self.connection_desired:
-                self.connection_desired = True
-                client.connect()
-        except Exception as e:
-            self.connection_desired = False
-            messagebox.showerror(title="OPC Error", message="Failure Connecting\nto OPC UA Server")
-            print(e)
-            return
-
-    def disconnect(self):
-
-        try:
-            if self.connection_desired:
-                client.disconnect()
-                self.connection_desired = False
-        except Exception as e:
-            messagebox.showerror(title="OPC Error", message="Failed to\nDisconnect")
-            print(e)
-
-        for child in user_interface.right_side.winfo_children():
-            child.destroy()
+from tkinter import *
+from tkinter import messagebox  # Entry
+from background_tasks import ConnectionManagement
 
 
 class UserInterface:
     def __init__(self):
+        # Root Window
         self.root = Tk()
-        self.body = Frame(self.root)
+        self.root.protocol("WM_DELETE_WINDOW", self.cleanup)
+        self.root.title("Motion Workshop")
+        self.root.geometry("1600x900")
+        self.root.resizable(width=True, height=True)
+        self.root.configure(bg="#333333")
+        self.root.grid_columnconfigure(0, weight=1)
+        self.root.grid_rowconfigure(1, weight=1)
+
+        # Screen Elements
+        self.menu_bar = Menu(self.root)
         self.header = Frame(self.root)
+        self.body = Frame(self.root)
+        self.scan_frame = Frame(self.root)
+        self.jog_frame = Frame(self.root)
         self.footer = Frame(self.root)
-        self.left_side = Frame(self.root)
-        self.right_side = Frame(self.root)
 
         # Header Elements
         self.status_display = None
@@ -68,78 +31,109 @@ class UserInterface:
         self.jog_speed_entry = None
         self.jog_accel_entry = None
 
+        # Draw UI
+        self.draw_header()
+        self.create_menubar()
+        self.draw_body()
+        self.draw_scan_frame()
+        self.draw_jog_frame()
+        self.draw_footer()
+
+    def create_menubar(self):
+        file_menu = Menu(self.menu_bar, tearoff=0)
+        file_menu.add_command(label="Open", command=self.dummy_function)
+
+        # Display Menus
+        self.menu_bar.add_cascade(label="File", menu=file_menu)
+
+        # Display Menubar
+        self.root.configure(menu=self.menu_bar)
+
     def draw_header(self):
-        btnx = 10
-        btny = 3
+        button_x = 10
+        button_y = 3
 
         self.header.configure(bg="#555555")
-        self.header.grid(row=0, column=0, columnspan=3, sticky=N+E+W)
+        self.header.grid(row=0, column=0, columnspan=2, sticky=N+E+W)
         self.header.grid_columnconfigure(100, weight=1)
 
-        openclientbtn = Button(self.header)
-        openclientbtn.configure(text="Connect\nClient", width=btnx, height=btny, command=self.dummyfunc, bg="#999999")
-        openclientbtn.grid(row=0, column=0, sticky=W, padx=10, pady=10)
+        open_client_button = Button(self.header)
+        open_client_button.configure(
+            text="Connect\nClient", width=button_x, height=button_y, command=self.dummy_function, bg="#999999")
+        open_client_button.grid(row=0, column=0, sticky=W, padx=10, pady=10)
 
-        disconnectbtn = Button(self.header)
-        disconnectbtn.configure(text="Disconnect\nClient", width=btnx, height=btny, command=self.dummyfunc, bg="#999999")
-        disconnectbtn.grid(row=0, column=1, sticky=W, pady=10)
+        disconnect_button = Button(self.header)
+        disconnect_button.configure(
+            text="Disconnect\nClient", width=button_x, height=button_y, command=self.dummy_function, bg="#999999")
+        disconnect_button.grid(row=0, column=1, sticky=W, pady=10)
 
-        clearerrbtn = Button(self.header)
-        clearerrbtn.configure(text="Reset", width=btnx, height=btny, command=self.dummyfunc, bg="#999999")
-        clearerrbtn.grid(row=0, column=100, sticky=E, padx=10, pady=10)
+        clear_error_button = Button(self.header)
+        clear_error_button.configure(
+            text="Reset", width=button_x, height=button_y, command=self.dummy_function, bg="#999999")
+        clear_error_button.grid(row=0, column=100, sticky=E, padx=10, pady=10)
 
         self.status_display = Label(self.header)
         self.status_display.configure(text="Disconnected", bg="#FF0000")
         self.status_display.grid(row=0, column=2, padx=10)
 
+    def draw_body(self):
+        self.body.configure(bg="#000000")
+        self.body.grid(row=1, column=0, sticky=N+E+S+W)
+
+    def draw_scan_frame(self):
+        button_x = 12
+        button_y = 2
+
+        self.scan_frame.configure(bg="#999999")
+        self.scan_frame.grid(row=1, column=1, rowspan=2, sticky=E+N+S)
+
+        body1_button = Button(self.scan_frame)
+        body1_button.configure(
+            text="Jog Controls", width=button_x, height=button_y, command=self.dummy_function, bg="#cccccc")
+        body1_button.grid(row=0, column=0, padx=10, pady=10)
+
+        body2_button = Button(self.scan_frame)
+        body2_button.configure(
+            text="Gear Axes", width=button_x, height=button_y, command=self.dummy_function, bg="#cccccc")
+        body2_button.grid(row=1, column=0, padx=10)
+
+        body3_button = Button(self.scan_frame)
+        body3_button.configure(
+            text="Set Limits", width=button_x, height=button_y, command=self.dummy_function, bg="#cccccc")
+        body3_button.grid(row=2, column=0, padx=10, pady=10)
+
+    def draw_jog_frame(self):
+        self.jog_frame.configure(bg="#333333", height=200)
+        self.jog_frame.grid(row=2, column=0, sticky=S + E + W)
+
+        for child in self.jog_frame.winfo_children():
+            child.destroy()
+
     def draw_footer(self):
 
-        self.footer.configure(bg="#555555")
-        self.footer.grid(row=2, column=0, columnspan=3, sticky=S+E+W)
+        self.footer.configure(bg="#555555", height=20)
+        self.footer.grid(row=3, column=0, columnspan=2, sticky=S+E+W)
 
         for child in self.footer.winfo_children():
             child.destroy()
 
-        self.jog_speed_entry = Entry(self.footer)
-        self.jog_speed_entry.configure(width=30, bg="#cccccc")
-        self.jog_speed_entry.grid(row=0, column=0, padx=10, pady=10)
-        self.jog_speed_entry.insert(0, "")
-
-        self.jog_accel_entry = Entry(self.footer)
-        self.jog_accel_entry.configure(width=30, bg="#cccccc")
-        self.jog_accel_entry.grid(row=1, column=0, padx=10, pady=10)
-        self.jog_accel_entry.insert(0, "")
-
-        speed_label = Label(self.footer)
-        speed_label.configure(text="Velocity ()", bg="#555555")
-        speed_label.grid(row=0, column=1, padx=10, pady=10)
-
-        accel_label = Label(self.footer)
-        accel_label.configure(text="Acceleration ()", bg="#555555")
-        accel_label.grid(row=1, column=1, padx=10, pady=10)
-
-    def draw_left_side(self):
-        btnx = 12
-        btny = 2
-
-        self.left_side.configure(bg="#999999")
-        self.left_side.grid(row=1, column=0, sticky=W + N + S)
-
-        body1_button = Button(self.left_side)
-        body1_button.configure(text="Jog Controls", width=btnx, height=btny, command=self.dummyfunc, bg="#cccccc")
-        body1_button.grid(row=0, column=0, padx=10, pady=10)
-
-        body2_button = Button(self.left_side)
-        body2_button.configure(text="Gear Axes", width=btnx, height=btny, command=self.dummyfunc, bg="#cccccc")
-        body2_button.grid(row=1, column=0, padx=10)
-
-        body3_button = Button(self.left_side)
-        body3_button.configure(text="Set Limits", width=btnx, height=btny, command=self.dummyfunc, bg="#cccccc")
-        body3_button.grid(row=2, column=0, padx=10, pady=10)
-
-    def draw_body(self):
-        self.body.configure(bg="#333333")
-        self.body.grid(row=1, column=1)
+        # self.jog_speed_entry = Entry(self.footer)
+        # self.jog_speed_entry.configure(width=30, bg="#cccccc")
+        # self.jog_speed_entry.grid(row=0, column=0, padx=10, pady=10)
+        # self.jog_speed_entry.insert(0, "")
+        #
+        # self.jog_accel_entry = Entry(self.footer)
+        # self.jog_accel_entry.configure(width=30, bg="#cccccc")
+        # self.jog_accel_entry.grid(row=1, column=0, padx=10, pady=10)
+        # self.jog_accel_entry.insert(0, "")
+        #
+        # speed_label = Label(self.footer)
+        # speed_label.configure(text="Velocity ()", bg="#555555")
+        # speed_label.grid(row=0, column=1, padx=10, pady=10)
+        #
+        # accel_label = Label(self.footer)
+        # accel_label.configure(text="Acceleration ()", bg="#555555")
+        # accel_label.grid(row=1, column=1, padx=10, pady=10)
 
     def update_status_display(self):
         false_boolean = False
@@ -149,33 +143,23 @@ class UserInterface:
             self.status_display.configure(text="Disconnected", bg="#FF0000")
 
     def cleanup(self):
-        user_interface.root.update()
-        user_interface.root.destroy()
+        self.root.update()
+        self.root.destroy()
+        connection_manager.close_requested = True
+        connection_manager_thread.join()
         exit()
 
-    def dummyfunc(self):
+    def dummy_function(self):
         return
+
+    @staticmethod
+    def make_message_box():
+        messagebox.showerror(title="title", message="message")
 
 
 def main():
-    # Initialize Tkinter
-    user_interface.root.protocol("WM_DELETE_WINDOW", user_interface.cleanup)
-    user_interface.root.title("Bosch Rexroth Commissioning Tool")
-    user_interface.root.geometry("640x480")
-    user_interface.root.resizable(width=False, height=False)
-    user_interface.root.configure(bg="#333333")
-    user_interface.root.grid_columnconfigure(1, weight=1)
-    user_interface.root.grid_rowconfigure(1, weight=1)
-
-    # Draw Frames
-    user_interface.draw_header()
-    user_interface.draw_footer()
-    user_interface.draw_left_side()
-    user_interface.draw_body()
-
     # Connect OPCUA Client
-    connection_management.open_client()
-    connection_management.start_connection_monitor_thread()
+    connection_manager_thread.start()
 
     # Tkinter Main Loop
     user_interface.root.mainloop()
@@ -183,10 +167,11 @@ def main():
 
 if __name__ == "__main__":
     # Create Global Instances of Class Objects
-    connection_management = ConnectionManagement()
-    # motion_control = MotionControl()
-    # axis_positioning = AxisPositioning()
+    connection_manager = ConnectionManagement()
     user_interface = UserInterface()
-    client = Client("opc.tcp://" + open("ip.txt", "r").read() + ":4840", timeout=3)
+
+    # Create Global Instances of Thread Objects
+    connection_manager_thread = threading.Thread(target=connection_manager.is_connected)
+    user_interface_thread = threading.Thread(target=None)
 
     main()
