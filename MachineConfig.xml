@@ -4,14 +4,32 @@
     <Axis>
       <Name>X</Name>
       <AxisNo>1</AxisNo>
+      <Rotary>False</Rotary>
+      <Linkable>False</Linkable>
+      <Offset>False</Offset>
     </Axis>
     <Axis>
       <Name>Y</Name>
       <AxisNo>2</AxisNo>
+      <Rotary>False</Rotary>
+      <Linkable>False</Linkable>
+      <Offset>False</Offset>
     </Axis>
     <Axis>
       <Name>Z</Name>
       <AxisNo>3</AxisNo>
+      <Rotary>False</Rotary>
+      <Linkable>False</Linkable>
+      <Offset>False</Offset>
     </Axis>
   </AxisList>
+  <DefaultScanType>P2P</DefaultScanType>
+  <AvailableScanTypes>
+    <ScanType>P2P</ScanType>
+  </AvailableScanTypes>
+  <SafetyDevices>
+    <SafetyDevice>Estop 1</SafetyDevice>
+    <SafetyDevice>Estop 2</SafetyDevice>
+    <SafetyDevice>Light Curtain</SafetyDevice>
+  </SafetyDevices>
 </config>

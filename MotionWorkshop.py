@@ -115,24 +115,6 @@ class UserInterface:
         for child in self.footer.winfo_children():
             child.destroy()
 
-        # self.jog_speed_entry = Entry(self.footer)
-        # self.jog_speed_entry.configure(width=30, bg="#cccccc")
-        # self.jog_speed_entry.grid(row=0, column=0, padx=10, pady=10)
-        # self.jog_speed_entry.insert(0, "")
-        #
-        # self.jog_accel_entry = Entry(self.footer)
-        # self.jog_accel_entry.configure(width=30, bg="#cccccc")
-        # self.jog_accel_entry.grid(row=1, column=0, padx=10, pady=10)
-        # self.jog_accel_entry.insert(0, "")
-        #
-        # speed_label = Label(self.footer)
-        # speed_label.configure(text="Velocity ()", bg="#555555")
-        # speed_label.grid(row=0, column=1, padx=10, pady=10)
-        #
-        # accel_label = Label(self.footer)
-        # accel_label.configure(text="Acceleration ()", bg="#555555")
-        # accel_label.grid(row=1, column=1, padx=10, pady=10)
-
     def update_status_display(self):
         false_boolean = False
         if false_boolean:
@@ -153,6 +135,10 @@ class UserInterface:
     @staticmethod
     def make_message_box():
         messagebox.showerror(title="title", message="message")
+
+    class ScanTypes:
+        def __init__(self):
+            return
 
 
 def main():
