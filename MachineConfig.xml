@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<config>
+  <AxisList>
+    <Axis>
+      <Name>X</Name>
+      <AxisNo>1</AxisNo>
+    </Axis>
+    <Axis>
+      <Name>Y</Name>
+      <AxisNo>2</AxisNo>
+    </Axis>
+    <Axis>
+      <Name>Z</Name>
+      <AxisNo>3</AxisNo>
+    </Axis>
+  </AxisList>
+</config>

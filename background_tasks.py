@@ -52,5 +52,26 @@ class ApplicationSettings:
         self.read_xml()
 
     def read_xml(self):
-        for item in xml.etree.ElementTree.parse(self.settings_file).getroot():
-            self.settings[item.tag] = item.text
+        for setting in xml.etree.ElementTree.parse(self.settings_file).getroot():
+            self.settings[setting.tag] = setting.text
+
+
+class Motion:
+    def __init__(self):
+        self.axis_file = "MachineConfig.xml"
+        self.axis_list = []
+
+        self.read_axes_from_file()
+
+    def read_axes_from_file(self):
+        self.axis_list = []
+        for axis_element in xml.etree.ElementTree.parse(self.axis_file).getroot().find("AxisList").findall("Axis"):
+            axis = self.Axis()
+            axis.name = axis_element.find("Name").text
+            axis.AxisNo = axis_element.find("AxisNo").text
+            self.axis_list.append(axis)
+
+    class Axis:
+        def __init__(self):
+            self.name = ""
+            self.AxisNo = 0

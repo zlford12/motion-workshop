@@ -1,7 +1,7 @@
 import threading
 from tkinter import *
 from tkinter import messagebox  # Entry
-from background_tasks import ConnectionManagement, ApplicationSettings
+from background_tasks import ConnectionManagement, ApplicationSettings, Motion
 
 
 class UserInterface:
@@ -159,12 +159,15 @@ def main():
     # Connect OPCUA Client
     connection_manager_thread.start()
 
+    print(motion.axis_list)
+
     # Tkinter Main Loop
     user_interface.root.mainloop()
 
 
 if __name__ == "__main__":
     # Create Global Instances of Class Objects
+    motion = Motion()
     application_settings = ApplicationSettings()
     connection_manager = ConnectionManagement()
     user_interface = UserInterface()
