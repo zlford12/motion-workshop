@@ -70,7 +70,7 @@ class Motion:
         self.axis_list = []
         for axis_element in xml.etree.ElementTree.parse(self.axis_file).getroot().find("AxisList").findall("Axis"):
             axis = self.Axis()
-            axis.AxisData.name = axis_element.find("Name").text
+            axis.AxisData.Name = axis_element.find("Name").text
             axis.AxisData.AxisNo = axis_element.find("AxisNo").text
             axis.AxisData.Rotary = axis_element.find("Rotary").text == "True"
             axis.AxisData.Linkable = axis_element.find("Linkable").text == "True"
@@ -94,7 +94,7 @@ class Motion:
 
     class AxisData:
         def __init__(self):
-            self.name = ""
+            self.Name = ""
             self.AxisNo = 0
             self.Rotary = False
             self.Linkable = False
