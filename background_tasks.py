@@ -75,3 +75,31 @@ class Motion:
         def __init__(self):
             self.name = ""
             self.AxisNo = 0
+            self.Rotary = False
+            self.Linkable = False
+            self.Offset = False
+
+        class AxisLimits:
+            def __init__(self):
+                self.MinPosition = 0
+                self.MaxPosition = 0
+                self.MinCrashPosition = 0
+                self.MaxCrashPosition = 0
+                self.MaxVelocity = 0
+                self.MaxAcceleration = 0
+                self.MaxDeceleration = 0
+
+        class AxisData:
+            def __init__(self):
+                self.Position = 0
+                self.Velocity = 0
+                self.Torque = 0
+                self.Error = False
+                self.Power = False
+                self.Standstill = False
+                self.InReference = False
+                self.Warning = False
+                self.ContinuousMotion = False
+                self.Homing = False
+                self.InPosition = False
+                self.Stopping = False
