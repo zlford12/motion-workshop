@@ -1,5 +1,4 @@
 from opcua import Client
-import time
 import xml.etree.ElementTree
 
 
@@ -13,17 +12,19 @@ class ConnectionManagement:
         self.error_message = ""
 
     def is_connected(self):
-        while True:
-            if self.connection_desired:
-                try:
-                    self.client.get_node("i=2253")
-                    self.connection_okay = True
+        if self.connection_desired:
+            try:
+                self.client.get_node("i=2253")
+                self.connection_okay = True
+                return True
 
-                except Exception as e:
-                    self.connection_okay = False
-                    print(e)
-
-            time.sleep(self.connection_loop_time)
+            except Exception as e:
+                self.connection_okay = False
+                self.error = True
+                self.error_message = e
+                return False
+        else:
+            return False
 
     def open_client(self, ip):
         try:

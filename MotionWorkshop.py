@@ -1,5 +1,3 @@
-import threading
-import time
 from tkinter import *
 from tkinter import messagebox  # Entry
 from background_tasks import ConnectionManagement, ApplicationSettings, Motion
@@ -39,8 +37,8 @@ class UserInterface:
         self.draw_footer()
 
         # Update Loop
-        self.close_requested = False
-        self.update_loop_time = 0.2
+        self.stop_update = False
+        self.update_loop_time = 200
 
     def create_menubar(self):
         file_menu = Menu(self.menu_bar, tearoff=0)
@@ -124,21 +122,25 @@ class UserInterface:
         self.connection_status_display.grid(row=0, column=100, padx=10, sticky=E)
 
     def update_loop(self):
-        while True:
-            # Update Connection Status Display
-            if connection_manager.connection_desired and connection_manager.connection_okay:
-                self.connection_status_display.configure(text="Connected")
-            else:
-                self.connection_status_display.configure(text="Disconnected")
+        # Update Connection Status Display
+        if connection_manager.is_connected():
+            self.connection_status_display.configure(text="Connected")
+        else:
+            self.connection_status_display.configure(text="Disconnected")
 
-            # Check For Connection Management Error
-            if connection_manager.error:
-                connection_manager.error = False
-                messagebox.showerror(title="Connection Error", message=connection_manager.error_message)
+        # Check For Connection Management Error
+        if connection_manager.error:
+            connection_manager.error = False
+            messagebox.showerror(title="Connection Error", message=connection_manager.error_message)
 
-            time.sleep(self.update_loop_time)
+        # Loop
+        if not self.stop_update:
+            self.root.after(self.update_loop_time, self.update_loop)
+            return
 
     def cleanup(self):
+        connection_manager.disconnect()
+        self.stop_update = True
         self.root.update()
         self.root.destroy()
         exit()
@@ -150,21 +152,22 @@ class UserInterface:
     def make_message_box():
         messagebox.showerror(title="title", message="message")
 
+    class JogControl:
+        def __init__(self):
+            return
+
     class ScanTypes:
         def __init__(self):
             return
 
 
 def main():
-    # Connect OPCUA Client
-    connection_manager_thread.start()
+    # Connect To OPCUA Server
     if application_settings.settings["ConnectAtStartup"] == "True":
         connection_manager.open_client(application_settings.settings["ControllerIP"])
 
-    # Start UI Update Thread
-    user_interface_update_thread.start()
-
     # Tkinter Main Loop
+    user_interface.root.after(user_interface.update_loop_time, user_interface.update_loop)
     user_interface.root.mainloop()
 
 
@@ -174,11 +177,5 @@ if __name__ == "__main__":
     motion = Motion()
     connection_manager = ConnectionManagement()
     user_interface = UserInterface()
-
-    # Create Global Instances of Thread Objects
-    connection_manager_thread = threading.Thread(target=connection_manager.is_connected)
-    connection_manager_thread.daemon = True
-    user_interface_update_thread = threading.Thread(target=user_interface.update_loop)
-    user_interface_update_thread.daemon = True
 
     main()
