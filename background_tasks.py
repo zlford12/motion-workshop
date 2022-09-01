@@ -59,7 +59,7 @@ class ApplicationSettings:
 class Motion:
     def __init__(self):
         self.axis_file = "MachineConfig.xml"
-        self.axis_list = []
+        self.axis_list = [self.Axis]
 
         self.read_axes_from_file()
 
@@ -67,18 +67,14 @@ class Motion:
         self.axis_list = []
         for axis_element in xml.etree.ElementTree.parse(self.axis_file).getroot().find("AxisList").findall("Axis"):
             axis = self.Axis()
-            axis.name = axis_element.find("Name").text
-            axis.AxisNo = axis_element.find("AxisNo").text
+            axis.AxisData.name = axis_element.find("Name").text
+            axis.AxisData.AxisNo = axis_element.find("AxisNo").text
+            axis.AxisData.Rotary = axis_element.find("Rotary").text == "True"
+            axis.AxisData.Linkable = axis_element.find("Linkable").text == "True"
+            axis.AxisData.Offset = axis_element.find("Offset").text == "True"
             self.axis_list.append(axis)
 
     class Axis:
-        def __init__(self):
-            self.name = ""
-            self.AxisNo = 0
-            self.Rotary = False
-            self.Linkable = False
-            self.Offset = False
-
         class AxisLimits:
             def __init__(self):
                 self.MinPosition = 0
@@ -91,6 +87,11 @@ class Motion:
 
         class AxisData:
             def __init__(self):
+                self.name = ""
+                self.AxisNo = 0
+                self.Rotary = False
+                self.Linkable = False
+                self.Offset = False
                 self.Position = 0
                 self.Velocity = 0
                 self.Torque = 0

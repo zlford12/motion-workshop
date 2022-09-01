@@ -145,7 +145,7 @@ def main():
     # Connect OPCUA Client
     connection_manager_thread.start()
 
-    print(motion.axis_list)
+    print(motion.axis_list[0].AxisData.AxisNo)
 
     # Tkinter Main Loop
     user_interface.root.mainloop()
