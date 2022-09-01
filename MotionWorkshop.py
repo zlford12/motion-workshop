@@ -24,6 +24,10 @@ class UserInterface:
         self.footer = Frame(self.root)
 
         # Header Elements
+        self.HeaderElement = None
+
+        # Jog Frame Elements
+        self.jog_controls = [self.JogControl(self.jog_frame, motion.Axis)]
 
         # Footer Elements
         self.connection_status_display = None
@@ -102,11 +106,16 @@ class UserInterface:
         body3_button.grid(row=2, column=0, padx=10, pady=10)
 
     def draw_jog_frame(self):
-        self.jog_frame.configure(bg="#333333", height=200)
+        self.jog_frame.configure(bg="#333333")
         self.jog_frame.grid(row=2, column=0, sticky=S + E + W)
 
         for child in self.jog_frame.winfo_children():
             child.destroy()
+
+        self.jog_controls = []
+        for i in range(len(motion.axis_list)):
+            self.jog_controls.append(self.JogControl(self.jog_frame, motion.axis_list[i]))
+            self.jog_controls[i].draw(0, i)
 
     def draw_footer(self):
 
@@ -153,8 +162,61 @@ class UserInterface:
         messagebox.showerror(title="title", message="message")
 
     class JogControl:
-        def __init__(self):
-            return
+        def __init__(self, frame, axis):
+            # Create Frame
+            self.frame = frame
+            self.axis = axis
+            self.subframe = Frame(self.frame)
+            self.subframe.configure(bg="#000000")
+
+            # Create Widgets
+            self.jog_negative_button = Button(self.subframe)
+            self.jog_negative_slow_button = Button(self.subframe)
+            self.axis_name_label = Label(self.subframe)
+            self.jog_positive_button = Button(self.subframe)
+            self.jog_positive_slow_button = Button(self.subframe)
+
+        def configure(self):
+            # Configure Widgets
+            self.jog_negative_button.configure(
+                text="<<", width=2, height=5
+            )
+            self.jog_negative_slow_button.configure(
+                text="<", width=2, height=5
+            )
+            self.axis_name_label.configure(
+                text=self.axis.AxisData.name, bg="#000000", fg="#FFFFFF"
+            )
+            self.jog_positive_slow_button.configure(
+                text=">", width=2, height=5
+            )
+            self.jog_positive_button.configure(
+                text=">>", width=2, height=5
+            )
+
+        def draw(self, row, column):
+            # Configure Widgets
+            self.configure()
+            
+            # Draw Frame
+            self.subframe.grid(row=row, column=column, padx=5, pady=5)
+
+            # Draw Widgets
+            self.jog_negative_button.grid(
+                row=0, column=0, rowspan=2
+            )
+            self.jog_negative_slow_button.grid(
+                row=0, column=1, rowspan=2
+            )
+            self.axis_name_label.grid(
+                row=0, column=2
+            )
+            self.jog_positive_slow_button.grid(
+                row=0, column=4, rowspan=2
+            )
+            self.jog_positive_button.grid(
+                row=0, column=5, rowspan=2
+            )
 
     class ScanTypes:
         def __init__(self):
@@ -165,9 +227,6 @@ def main():
     # Connect To OPCUA Server
     if application_settings.settings["ConnectAtStartup"] == "True":
         connection_manager.open_client(application_settings.settings["ControllerIP"])
-
-    # Test Code
-    print("nothing")
 
     # Tkinter Main Loop
     user_interface.root.after(user_interface.update_loop_time, user_interface.update_loop)
