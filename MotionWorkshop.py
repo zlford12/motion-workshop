@@ -62,12 +62,14 @@ class UserInterface:
 
         open_client_button = Button(self.header)
         open_client_button.configure(
-            text="Connect\nClient", width=button_x, height=button_y, command=self.dummy_function, bg="#999999")
+            text="Connect\nClient", width=button_x, height=button_y,
+            command=lambda: connection_manager.open_client(application_settings.settings["ControllerIP"]), bg="#999999")
         open_client_button.grid(row=0, column=0, sticky=W, padx=10, pady=10)
 
         disconnect_button = Button(self.header)
         disconnect_button.configure(
-            text="Disconnect\nClient", width=button_x, height=button_y, command=self.dummy_function, bg="#999999")
+            text="Disconnect\nClient", width=button_x, height=button_y,
+            command=connection_manager.disconnect, bg="#999999")
         disconnect_button.grid(row=0, column=1, sticky=W, pady=10)
 
         clear_error_button = Button(self.header)
@@ -123,10 +125,16 @@ class UserInterface:
 
     def update_loop(self):
         while True:
+            # Update Connection Status Display
             if connection_manager.connection_desired and connection_manager.connection_okay:
                 self.connection_status_display.configure(text="Connected")
             else:
                 self.connection_status_display.configure(text="Disconnected")
+
+            # Check For Connection Management Error
+            if connection_manager.error:
+                connection_manager.error = False
+                messagebox.showerror(title="Connection Error", message=connection_manager.error_message)
 
             time.sleep(self.update_loop_time)
 
@@ -150,6 +158,10 @@ class UserInterface:
 def main():
     # Connect OPCUA Client
     connection_manager_thread.start()
+    if application_settings.settings["ConnectAtStartup"] == "True":
+        connection_manager.open_client(application_settings.settings["ControllerIP"])
+
+    # Start UI Update Thread
     user_interface_update_thread.start()
 
     # Tkinter Main Loop

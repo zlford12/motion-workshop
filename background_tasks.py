@@ -9,6 +9,8 @@ class ConnectionManagement:
         self.connection_okay = False
         self.connection_loop_time = 0.5
         self.client = Client("to be determined", timeout=3)
+        self.error = False
+        self.error_message = ""
 
     def is_connected(self):
         while True:
@@ -23,16 +25,17 @@ class ConnectionManagement:
 
             time.sleep(self.connection_loop_time)
 
-    def open_client(self):
+    def open_client(self, ip):
         try:
             if not self.connection_desired:
                 self.connection_desired = True
+                print("opc.tcp://" + ip + ":4840")
+                self.client = Client("opc.tcp://" + ip + ":4840", timeout=3)
                 self.client.connect()
         except Exception as e:
             self.connection_desired = False
-            # messagebox.showerror(title="OPC Error", message="Failure Connecting\nto OPC UA Server")
-            print(e)
-            return
+            self.error = True
+            self.error_message = e
 
     def disconnect(self):
         try:
@@ -40,8 +43,8 @@ class ConnectionManagement:
                 self.client.disconnect()
                 self.connection_desired = False
         except Exception as e:
-            # messagebox.showerror(title="OPC Error", message="Failed to\nDisconnect")
-            print(e)
+            self.error = True
+            self.error_message = e
 
 
 class ApplicationSettings:
