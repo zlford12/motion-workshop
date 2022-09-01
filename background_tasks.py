@@ -30,7 +30,6 @@ class ConnectionManagement:
         try:
             if not self.connection_desired:
                 self.connection_desired = True
-                print("opc.tcp://" + ip + ":4840")
                 self.client = Client("opc.tcp://" + ip + ":4840", timeout=3)
                 self.client.connect()
         except Exception as e:
@@ -63,48 +62,52 @@ class ApplicationSettings:
 class Motion:
     def __init__(self):
         self.axis_file = "MachineConfig.xml"
-        self.axis_list = {"NoAxis": self.Axis}
+        self.axis_list = [self.Axis()]
 
         self.read_axes_from_file()
 
     def read_axes_from_file(self):
-        self.axis_list = {}
+        self.axis_list = []
         for axis_element in xml.etree.ElementTree.parse(self.axis_file).getroot().find("AxisList").findall("Axis"):
             axis = self.Axis()
             axis.AxisData.name = axis_element.find("Name").text
-            print(axis.AxisData.name)
             axis.AxisData.AxisNo = axis_element.find("AxisNo").text
             axis.AxisData.Rotary = axis_element.find("Rotary").text == "True"
             axis.AxisData.Linkable = axis_element.find("Linkable").text == "True"
             axis.AxisData.Offset = axis_element.find("Offset").text == "True"
+            self.axis_list.append(axis)
 
     class Axis:
-        class AxisLimits:
-            def __init__(self):
-                self.MinPosition = 0
-                self.MaxPosition = 0
-                self.MinCrashPosition = 0
-                self.MaxCrashPosition = 0
-                self.MaxVelocity = 0
-                self.MaxAcceleration = 0
-                self.MaxDeceleration = 0
+        def __init__(self):
+            self.AxisLimits = Motion.AxisLimits()
+            self.AxisData = Motion.AxisData()
 
-        class AxisData:
-            def __init__(self):
-                self.name = ""
-                self.AxisNo = 0
-                self.Rotary = False
-                self.Linkable = False
-                self.Offset = False
-                self.Position = 0
-                self.Velocity = 0
-                self.Torque = 0
-                self.Error = False
-                self.Power = False
-                self.Standstill = False
-                self.InReference = False
-                self.Warning = False
-                self.ContinuousMotion = False
-                self.Homing = False
-                self.InPosition = False
-                self.Stopping = False
+    class AxisLimits:
+        def __init__(self):
+            self.MinPosition = 0
+            self.MaxPosition = 0
+            self.MinCrashPosition = 0
+            self.MaxCrashPosition = 0
+            self.MaxVelocity = 0
+            self.MaxAcceleration = 0
+            self.MaxDeceleration = 0
+
+    class AxisData:
+        def __init__(self):
+            self.name = ""
+            self.AxisNo = 0
+            self.Rotary = False
+            self.Linkable = False
+            self.Offset = False
+            self.Position = 0
+            self.Velocity = 0
+            self.Torque = 0
+            self.Error = False
+            self.Power = False
+            self.Standstill = False
+            self.InReference = False
+            self.Warning = False
+            self.ContinuousMotion = False
+            self.Homing = False
+            self.InPosition = False
+            self.Stopping = False

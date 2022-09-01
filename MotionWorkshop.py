@@ -166,6 +166,9 @@ def main():
     if application_settings.settings["ConnectAtStartup"] == "True":
         connection_manager.open_client(application_settings.settings["ControllerIP"])
 
+    # Test Code
+    print("nothing")
+
     # Tkinter Main Loop
     user_interface.root.after(user_interface.update_loop_time, user_interface.update_loop)
     user_interface.root.mainloop()

@@ -12,3 +12,4 @@ Rexroth Motion Test Bench
 - add tab control left of scan frame
 - add safety device to tab control
 - add tab control right of job frame
+- auto-populate missing application settings
