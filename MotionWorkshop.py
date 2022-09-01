@@ -1,4 +1,5 @@
 import threading
+import time
 from tkinter import *
 from tkinter import messagebox  # Entry
 from background_tasks import ConnectionManagement, ApplicationSettings, Motion
@@ -37,6 +38,10 @@ class UserInterface:
         self.draw_jog_frame()
         self.draw_footer()
 
+        # Update Loop
+        self.close_requested = False
+        self.update_loop_time = 0.2
+
     def create_menubar(self):
         file_menu = Menu(self.menu_bar, tearoff=0)
         file_menu.add_command(label="Open", command=self.dummy_function)
@@ -69,10 +74,6 @@ class UserInterface:
         clear_error_button.configure(
             text="Reset", width=button_x, height=button_y, command=self.dummy_function, bg="#999999")
         clear_error_button.grid(row=0, column=100, sticky=E, padx=10, pady=10)
-
-        self.connection_status_display = Label(self.header)
-        self.connection_status_display.configure(text="Disconnected", bg="#FF0000")
-        self.connection_status_display.grid(row=0, column=2, padx=10)
 
     def draw_body(self):
         self.body.configure(bg="#000000")
@@ -110,23 +111,28 @@ class UserInterface:
     def draw_footer(self):
 
         self.footer.configure(bg="#555555", height=20)
+        self.footer.columnconfigure(100, weight=1)
         self.footer.grid(row=3, column=0, columnspan=2, sticky=S+E+W)
 
         for child in self.footer.winfo_children():
             child.destroy()
 
-    def update_status_display(self):
-        false_boolean = False
-        if false_boolean:
-            self.connection_status_display.configure(text="Connected", bg="#00FF00")
-        else:
-            self.connection_status_display.configure(text="Disconnected", bg="#FF0000")
+        self.connection_status_display = Label(self.footer)
+        self.connection_status_display.configure(text="Disconnected", bg="#555555")
+        self.connection_status_display.grid(row=0, column=100, padx=10, sticky=E)
+
+    def update_loop(self):
+        while True:
+            if connection_manager.connection_desired and connection_manager.connection_okay:
+                self.connection_status_display.configure(text="Connected")
+            else:
+                self.connection_status_display.configure(text="Disconnected")
+
+            time.sleep(self.update_loop_time)
 
     def cleanup(self):
         self.root.update()
         self.root.destroy()
-        connection_manager.close_requested = True
-        connection_manager_thread.join()
         exit()
 
     def dummy_function(self):
@@ -144,8 +150,7 @@ class UserInterface:
 def main():
     # Connect OPCUA Client
     connection_manager_thread.start()
-
-    print(motion.axis_list[0].AxisData.AxisNo)
+    user_interface_update_thread.start()
 
     # Tkinter Main Loop
     user_interface.root.mainloop()
@@ -153,13 +158,15 @@ def main():
 
 if __name__ == "__main__":
     # Create Global Instances of Class Objects
-    motion = Motion()
     application_settings = ApplicationSettings()
+    motion = Motion()
     connection_manager = ConnectionManagement()
     user_interface = UserInterface()
 
     # Create Global Instances of Thread Objects
     connection_manager_thread = threading.Thread(target=connection_manager.is_connected)
-    user_interface_thread = threading.Thread(target=None)
+    connection_manager_thread.daemon = True
+    user_interface_update_thread = threading.Thread(target=user_interface.update_loop)
+    user_interface_update_thread.daemon = True
 
     main()

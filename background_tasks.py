@@ -7,19 +7,19 @@ class ConnectionManagement:
     def __init__(self):
         self.connection_desired = False
         self.connection_okay = False
-        self.close_requested = False
         self.connection_loop_time = 0.5
-        self.client = Client("opc.tcp://" + open("ip.txt", "r").read() + ":4840", timeout=3)
+        self.client = Client("to be determined", timeout=3)
 
     def is_connected(self):
-        while not self.close_requested:
-            try:
-                self.client.get_node("i=2253")
-                self.connection_okay = True
+        while True:
+            if self.connection_desired:
+                try:
+                    self.client.get_node("i=2253")
+                    self.connection_okay = True
 
-            except Exception as e:
-                self.connection_okay = False
-                print(e)
+                except Exception as e:
+                    self.connection_okay = False
+                    print(e)
 
             time.sleep(self.connection_loop_time)
 
@@ -59,20 +59,20 @@ class ApplicationSettings:
 class Motion:
     def __init__(self):
         self.axis_file = "MachineConfig.xml"
-        self.axis_list = [self.Axis]
+        self.axis_list = {"NoAxis": self.Axis}
 
         self.read_axes_from_file()
 
     def read_axes_from_file(self):
-        self.axis_list = []
+        self.axis_list = {}
         for axis_element in xml.etree.ElementTree.parse(self.axis_file).getroot().find("AxisList").findall("Axis"):
             axis = self.Axis()
             axis.AxisData.name = axis_element.find("Name").text
+            print(axis.AxisData.name)
             axis.AxisData.AxisNo = axis_element.find("AxisNo").text
             axis.AxisData.Rotary = axis_element.find("Rotary").text == "True"
             axis.AxisData.Linkable = axis_element.find("Linkable").text == "True"
             axis.AxisData.Offset = axis_element.find("Offset").text == "True"
-            self.axis_list.append(axis)
 
     class Axis:
         class AxisLimits:
