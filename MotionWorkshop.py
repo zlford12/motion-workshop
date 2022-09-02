@@ -214,7 +214,6 @@ class UserInterface:
             self.axis = axis
             self.colors = colors
             self.subframe = Frame(self.frame)
-            self.subframe.configure(bg=colors[0], width=500)
 
             # Create Widgets
             self.jog_negative_button = Button(self.subframe)
@@ -231,6 +230,11 @@ class UserInterface:
                 unit_string = "°"
             else:
                 unit_string = "mm"
+
+            # Configure Frame
+            self.subframe.configure(bg=self.colors[0], width=350, height=115)
+            self.subframe.columnconfigure(2, weight=1)
+            self.subframe.grid_propagate(False)
 
             # Configure Widgets
             self.jog_negative_button.configure(
@@ -285,7 +289,7 @@ class UserInterface:
                 row=0, column=1, rowspan=2, pady=5
             )
             self.axis_position_label.grid(
-                row=0, column=2, padx=30, pady=5, rowspan=2
+                row=0, column=2, padx=30, pady=5, rowspan=2, sticky=W
             )
             self.go_to_entry.grid(
                 row=0, column=3, padx=10, pady=(10, 0), sticky=S

@@ -15,3 +15,4 @@ Rexroth Motion Test Bench
 - add tab control right of job frame
 - auto-populate missing application settings
 - make icons
+- add scrollbar when jog frame gets too small
