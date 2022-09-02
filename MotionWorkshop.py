@@ -1,6 +1,7 @@
 from tkinter import *
-from tkinter import messagebox  # Entry
+from tkinter import messagebox, font
 from background_tasks import ConnectionManagement, ApplicationSettings, Motion
+from scan_types import ScanTypes
 
 
 class UserInterface:
@@ -12,7 +13,7 @@ class UserInterface:
             "#555555",  # header and footer background
             "#999999",  # header button color, scan frame background
             "#cccccc",  # scan frame button color
-            "#FFFFFF"   # light text color
+            "#FFFFFF"  # light text color
         ]
 
         # Root Window
@@ -26,7 +27,14 @@ class UserInterface:
         self.root.grid_columnconfigure(0, weight=1)
         self.root.grid_rowconfigure(1, weight=1)
 
-        # Screen Elements
+        # Font
+        self.default_font = font.nametofont("TkDefaultFont").configure(
+            family="Arial Black",
+            size=10,
+            weight=font.BOLD
+        )
+
+        # Window Elements
         self.menu_bar = Menu(self.root)
         self.header = Frame(self.root)
         self.body = Frame(self.root)
@@ -36,6 +44,11 @@ class UserInterface:
 
         # Header Elements
         self.HeaderElement = None
+
+        # Scan Frame
+        self.selected_scan_mode = None
+        self.scan_types = ScanTypes()
+        self.scan_controls = None
 
         # Jog Frame Elements
         self.jog_controls = [self.JogControl(self.jog_frame, motion.Axis, self.colors)]
@@ -81,6 +94,10 @@ class UserInterface:
             label="Machine Configuration",
             command=self.dummy_function
         )
+        system_menu.add_command(
+            label="Change Scan Type",
+            command=self.dummy_function
+        )
 
         # Display Menus
         self.menu_bar.add_cascade(label="File", menu=file_menu)
@@ -94,7 +111,7 @@ class UserInterface:
         button_y = 3
 
         self.header.configure(bg=self.colors[2])
-        self.header.grid(row=0, column=0, columnspan=2, sticky=N+E+W)
+        self.header.grid(row=0, column=0, columnspan=2, sticky=N + E + W)
         self.header.grid_columnconfigure(100, weight=1)
 
         open_client_button = Button(self.header)
@@ -118,29 +135,18 @@ class UserInterface:
 
     def draw_body(self):
         self.body.configure(bg=self.colors[0])
-        self.body.grid(row=1, column=0, sticky=N+E+S+W)
+        self.body.grid(row=1, column=0, sticky=N + E + S + W)
 
     def draw_scan_frame(self):
-        button_x = 12
-        button_y = 2
 
         self.scan_frame.configure(bg=self.colors[3])
-        self.scan_frame.grid(row=1, column=1, rowspan=2, sticky=E+N+S)
+        self.scan_frame.grid(row=1, column=1, rowspan=2, sticky=E + N + S)
 
-        body1_button = Button(self.scan_frame)
-        body1_button.configure(
-            text="Jog Controls", width=button_x, height=button_y, command=self.dummy_function, bg=self.colors[4])
-        body1_button.grid(row=0, column=0, padx=10, pady=10)
+        if self.selected_scan_mode is None:
+            self.selected_scan_mode = motion.machine_config.default_scan_type
 
-        body2_button = Button(self.scan_frame)
-        body2_button.configure(
-            text="Gear Axes", width=button_x, height=button_y, command=self.dummy_function, bg=self.colors[4])
-        body2_button.grid(row=1, column=0, padx=10)
-
-        body3_button = Button(self.scan_frame)
-        body3_button.configure(
-            text="Set Limits", width=button_x, height=button_y, command=self.dummy_function, bg=self.colors[4])
-        body3_button.grid(row=2, column=0, padx=10, pady=10)
+        self.scan_controls = self.scan_types.scan_types[self.selected_scan_mode](self.scan_frame, self.colors)
+        self.scan_controls.draw()
 
     def draw_jog_frame(self):
         self.jog_frame.configure(bg=self.colors[1])
@@ -164,13 +170,14 @@ class UserInterface:
 
         self.footer.configure(bg=self.colors[2], height=20)
         self.footer.columnconfigure(100, weight=1)
-        self.footer.grid(row=3, column=0, columnspan=2, sticky=S+E+W)
+        self.footer.grid(row=3, column=0, columnspan=2, sticky=S + E + W)
+        local_font = ("Arial", 10)
 
         for child in self.footer.winfo_children():
             child.destroy()
 
         self.connection_status_display = Label(self.footer)
-        self.connection_status_display.configure(text="Disconnected", bg=self.colors[2])
+        self.connection_status_display.configure(text="Disconnected", bg=self.colors[2], font=local_font)
         self.connection_status_display.grid(row=0, column=100, padx=10, sticky=E)
 
     def update_loop(self):
@@ -200,10 +207,6 @@ class UserInterface:
     def dummy_function(self):
         return
 
-    @staticmethod
-    def make_message_box():
-        messagebox.showerror(title="title", message="message")
-
     class JogControl:
         def __init__(self, frame, axis, colors):
             # Create Frame
@@ -216,7 +219,6 @@ class UserInterface:
             # Create Widgets
             self.jog_negative_button = Button(self.subframe)
             self.jog_negative_slow_button = Button(self.subframe)
-            self.axis_name_label = Label(self.subframe)
             self.axis_position_label = Label(self.subframe)
             self.go_to_entry = Entry(self.subframe)
             self.go_to_button = Button(self.subframe)
@@ -224,6 +226,12 @@ class UserInterface:
             self.jog_positive_slow_button = Button(self.subframe)
 
         def configure(self):
+            # Unit
+            if self.axis.AxisData.Rotary:
+                unit_string = "°"
+            else:
+                unit_string = "mm"
+
             # Configure Widgets
             self.jog_negative_button.configure(
                 text="<<", width=2, height=5, bg=self.colors[3]
@@ -231,11 +239,10 @@ class UserInterface:
             self.jog_negative_slow_button.configure(
                 text="<", width=2, height=5, bg=self.colors[3]
             )
-            self.axis_name_label.configure(
-                text=self.axis.AxisData.Name, bg=self.colors[0], fg=self.colors[5]
-            )
             self.axis_position_label.configure(
-                text="Position\n" + str(self.axis.AxisData.Position), bg=self.colors[0], fg=self.colors[5]
+                text=self.axis.AxisData.Name + " \n" +
+                str(self.axis.AxisData.Position) + " " + unit_string,
+                bg=self.colors[0], fg=self.colors[5], justify=LEFT, font=("Arial Black", 12)
             )
             self.go_to_entry.configure(
                 width=10, bg=self.colors[3]
@@ -272,33 +279,26 @@ class UserInterface:
 
             # Draw Widgets
             self.jog_negative_button.grid(
-                row=0, column=0, rowspan=2
+                row=0, column=0, rowspan=2, padx=(5, 0), pady=5
             )
             self.jog_negative_slow_button.grid(
-                row=0, column=1, rowspan=2
-            )
-            self.axis_name_label.grid(
-                row=0, column=2, padx=50, pady=5
+                row=0, column=1, rowspan=2, pady=5
             )
             self.axis_position_label.grid(
-                row=1, column=2, padx=5, pady=5
+                row=0, column=2, padx=30, pady=5, rowspan=2
             )
             self.go_to_entry.grid(
-                row=0, column=3, padx=10, pady=(10,0), sticky=S
+                row=0, column=3, padx=10, pady=(10, 0), sticky=S
             )
             self.go_to_button.grid(
                 row=1, column=3, padx=5, pady=5
             )
             self.jog_positive_slow_button.grid(
-                row=0, column=4, rowspan=2
+                row=0, column=4, rowspan=2, pady=5
             )
             self.jog_positive_button.grid(
-                row=0, column=5, rowspan=2
+                row=0, column=5, rowspan=2, padx=(0, 5), pady=5
             )
-
-    class ScanTypes:
-        def __init__(self):
-            return
 
 
 def main():

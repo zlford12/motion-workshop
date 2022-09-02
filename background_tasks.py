@@ -62,6 +62,7 @@ class ApplicationSettings:
 class Motion:
     def __init__(self):
         self.axis_file = "MachineConfig.xml"
+        self.machine_config = self.MachineConfig(self.axis_file)
         self.axis_list = [self.Axis()]
 
         self.read_axes_from_file()
@@ -111,3 +112,23 @@ class Motion:
             self.Homing = False
             self.InPosition = False
             self.Stopping = False
+
+    class MachineConfig:
+        def __init__(self, config_file):
+            self.config_file = config_file
+            self.default_scan_type = ""
+            self.available_scan_types = []
+            self.safety_devices = []
+
+            self.read_config_from_file()
+
+        def read_config_from_file(self):
+            self.default_scan_type = ""
+            self.available_scan_types = []
+            self.safety_devices = []
+            config = xml.etree.ElementTree.parse(self.config_file).getroot()
+            self.default_scan_type = config.find("DefaultScanType").text
+            for scan_type in config.find("AvailableScanTypes").findall("ScanType"):
+                self.available_scan_types.append(scan_type.text)
+            for safety_device in config.find("SafetyDevices").findall("SafetyDevice"):
+                self.safety_devices.append(safety_device.text)
