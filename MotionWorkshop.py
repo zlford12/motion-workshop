@@ -181,10 +181,15 @@ class UserInterface:
         self.connection_status_display.grid(row=0, column=100, padx=10, sticky=E)
 
     def update_loop(self):
-        # Update Connection Status Display
-        if connection_manager.is_connected():
+        # On Connect To PLC
+        if connection_manager.is_connected() and (self.connection_status_display["text"] == "Disconnected"):
             self.connection_status_display.configure(text="Connected")
-        else:
+            motion.read_axes_from_system(connection_manager.client)
+            motion.machine_config.read_config_from_system(connection_manager.client)
+            self.draw_jog_frame()
+
+        # On Disconnect From PLC
+        if not connection_manager.is_connected() and (self.connection_status_display["text"] == "Connected"):
             self.connection_status_display.configure(text="Disconnected")
 
         # Check For Connection Management Error
@@ -192,10 +197,18 @@ class UserInterface:
             connection_manager.error = False
             messagebox.showerror(title="Connection Error", message=connection_manager.error_message)
 
+        # Update Axis Data
+        if connection_manager.is_connected():
+            for axis in motion.axis_list:
+                axis.AxisData.update(connection_manager.client)
+
+        # Update Jog Controls
+        for x in self.jog_controls:
+            x.update()
+
         # Loop
         if not self.stop_update:
             self.root.after(self.update_loop_time, self.update_loop)
-            return
 
     def cleanup(self):
         connection_manager.disconnect()
@@ -245,7 +258,7 @@ class UserInterface:
             )
             self.axis_position_label.configure(
                 text=self.axis.AxisData.Name + " \n" +
-                str(self.axis.AxisData.Position) + " " + unit_string,
+                str(round(self.axis.AxisData.Position, 2)) + " " + unit_string,
                 bg=self.colors[0], fg=self.colors[5], justify=LEFT, font=("Arial Black", 12)
             )
             self.go_to_entry.configure(
@@ -259,6 +272,14 @@ class UserInterface:
             )
             self.jog_positive_button.configure(
                 text=">>", width=2, height=5, bg=self.colors[3]
+            )
+
+            # Bind Widgets
+            self.jog_positive_button.bind(
+                "<ButtonPress>", lambda state: self.jog_positive(True)
+            )
+            self.jog_positive_button.bind(
+                "<ButtonRelease>", lambda state: self.jog_positive(False)
             )
 
         def draw(self, row, column):
@@ -303,6 +324,30 @@ class UserInterface:
             self.jog_positive_button.grid(
                 row=0, column=5, rowspan=2, padx=(0, 5), pady=5
             )
+
+        def update(self):
+            # Unit
+            if self.axis.AxisData.Rotary:
+                unit_string = "°"
+            else:
+                unit_string = "mm"
+
+            # Update Widgets
+            self.axis_position_label.configure(
+                text=self.axis.AxisData.Name + " \n" +
+                str(round(self.axis.AxisData.Position, 2)) + " " + unit_string,
+                bg=self.colors[0], fg=self.colors[5], justify=LEFT, font=("Arial Black", 12)
+            )
+
+        def jog_positive(self, button_state):
+            client = connection_manager.client
+            i = self.axis.AxisData.AxisNo
+            client.get_node(
+                "ns=2;s=Application.MNDT_Vars.arHalfSpeed[" + str(i) + "]"
+            ).set_value(False)
+            client.get_node(
+                "ns=2;s=Application.MNDT_Vars.arJogPositive[" + str(i) + "]"
+            ).set_value(button_state)
 
 
 def main():

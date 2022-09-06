@@ -78,6 +78,33 @@ class Motion:
             axis.AxisData.Offset = axis_element.find("Offset").text == "True"
             self.axis_list.append(axis)
 
+    def read_axes_from_system(self, client=Client("to be determined", timeout=3)):
+        self.axis_list = []
+        number_of_axes = client.get_node("ns=2;s=Application.Custom_Vars.iNumberOfAxesToVar").get_value()
+        for i in range(number_of_axes):
+            axis = self.Axis()
+            axis.AxisData.Name = \
+                client.get_node(
+                    "ns=2;s=Application.PersistentVars.arAxisNames[" + str(i + 1) + "]"
+                ).get_value()
+            axis.AxisData.AxisNo = \
+                client.get_node(
+                    "ns=2;s=Application.PersistentVars.arAxisList[" + str(i + 1) + "].AxisNo"
+                ).get_value()
+            axis.AxisData.Rotary = \
+                client.get_node(
+                    "ns=2;s=Application.MNDT_Vars.arMNDTAxisData[" + str(i + 1) + "].Rotary"
+                ).get_value()
+            axis.AxisData.Linkable = \
+                client.get_node(
+                    "ns=2;s=Application.MNDT_Vars.arMNDTAxisData[" + str(i + 1) + "].LinkableAxis"
+                ).get_value()
+            axis.AxisData.Offset = \
+                client.get_node(
+                    "ns=2;s=Application.MNDT_Vars.arMNDTAxisData[" + str(i + 1) + "].OffsetAxis"
+                ).get_value()
+            self.axis_list.append(axis)
+
     class Axis:
         def __init__(self):
             self.AxisLimits = Motion.AxisLimits()
@@ -113,6 +140,33 @@ class Motion:
             self.InPosition = False
             self.Stopping = False
 
+        def update(self, client=Client("to be determined", timeout=3)):
+            self.Position = \
+                client.get_node(
+                    "ns=2;s=Application.MNDT_Vars.arMNDTAxisData[" + str(self.AxisNo) + "].Position"
+                ).get_value()
+            self.Velocity = \
+                client.get_node(
+                    "ns=2;s=Application.MNDT_Vars.arMNDTAxisData[" + str(self.AxisNo) + "].Velocity"
+                ).get_value()
+            self.Torque = \
+                client.get_node(
+                    "ns=2;s=Application.MNDT_Vars.arMNDTAxisData[" + str(self.AxisNo) + "].Torque"
+                ).get_value()
+            status_bits = \
+                client.get_node(
+                    "ns=2;s=Application.MNDT_Vars.arMNDTAxisData[" + str(self.AxisNo) + "].StatusBits"
+                ).get_value()
+            self.Error = status_bits & (1 << 0) != 0
+            self.Power = status_bits & (1 << 0) != 0
+            self.Standstill = status_bits & (1 << 0) != 0
+            self.InReference = status_bits & (1 << 0) != 0
+            self.Warning = status_bits & (1 << 0) != 0
+            self.ContinuousMotion = status_bits & (1 << 0) != 0
+            self.Homing = status_bits & (1 << 0) != 0
+            self.InPosition = status_bits & (1 << 0) != 0
+            self.Stopping = status_bits & (1 << 0) != 0
+
     class MachineConfig:
         def __init__(self, config_file):
             self.config_file = config_file
@@ -123,7 +177,6 @@ class Motion:
             self.read_config_from_file()
 
         def read_config_from_file(self):
-            self.default_scan_type = ""
             self.available_scan_types = []
             self.safety_devices = []
             config = xml.etree.ElementTree.parse(self.config_file).getroot()
@@ -132,3 +185,6 @@ class Motion:
                 self.available_scan_types.append(scan_type.text)
             for safety_device in config.find("SafetyDevices").findall("SafetyDevice"):
                 self.safety_devices.append(safety_device.text)
+
+        def read_config_from_system(self, client=Client("to be determined", timeout=3)):
+            return

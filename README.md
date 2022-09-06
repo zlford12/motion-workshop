@@ -5,8 +5,9 @@ Rexroth Motion Test Bench
 
 ### To Do List:
 - modify settings from menu bar
-- read axis info from controller after connection
 - write axis into back to file after connection
+- read machine config from controller after connection
+- write machine config back to file after connection
 - populate ScanTypes class
 - load scan frame from ScanTypes class
 - create jog controls
