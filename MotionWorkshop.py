@@ -180,6 +180,15 @@ class UserInterface:
         self.connection_status_display.configure(text="Disconnected", bg=self.colors[2], font=local_font)
         self.connection_status_display.grid(row=0, column=100, padx=10, sticky=E)
 
+    def startup(self):
+        # Connect To OPCUA Server
+        if application_settings.settings["ConnectAtStartup"] == "True":
+            connection_manager.open_client(application_settings.settings["ControllerIP"])
+
+        # Loop
+        if not self.stop_update:
+            self.root.after(self.update_loop_time, self.update_loop)
+
     def update_loop(self):
         # On Connect To PLC
         if connection_manager.is_connected() and (self.connection_status_display["text"] == "Disconnected"):
@@ -276,10 +285,10 @@ class UserInterface:
 
             # Bind Widgets
             self.jog_positive_button.bind(
-                "<ButtonPress>", lambda state: self.jog_positive(True)
+                "<ButtonPress>", lambda state: self.jog_positive(True, False)
             )
             self.jog_positive_button.bind(
-                "<ButtonRelease>", lambda state: self.jog_positive(False)
+                "<ButtonRelease>", lambda state: self.jog_positive(False, False)
             )
 
         def draw(self, row, column):
@@ -339,24 +348,32 @@ class UserInterface:
                 bg=self.colors[0], fg=self.colors[5], justify=LEFT, font=("Arial Black", 12)
             )
 
-        def jog_positive(self, button_state):
-            client = connection_manager.client
-            i = self.axis.AxisData.AxisNo
-            client.get_node(
-                "ns=2;s=Application.MNDT_Vars.arHalfSpeed[" + str(i) + "]"
-            ).set_value(False)
-            client.get_node(
-                "ns=2;s=Application.MNDT_Vars.arJogPositive[" + str(i) + "]"
-            ).set_value(button_state)
+        def jog_positive(self, button_state, half_speed):
+            if connection_manager.is_connected():
+                client = connection_manager.client
+                i = self.axis.AxisData.AxisNo
+                client.get_node(
+                    "ns=2;s=Application.MNDT_Vars.arHalfSpeed[" + str(i) + "]"
+                ).set_value(half_speed)
+                client.get_node(
+                    "ns=2;s=Application.MNDT_Vars.arJogPositive[" + str(i) + "]"
+                ).set_value(button_state)
+
+        def jog_negative(self, button_state, half_speed):
+            if connection_manager.is_connected():
+                client = connection_manager.client
+                i = self.axis.AxisData.AxisNo
+                client.get_node(
+                    "ns=2;s=Application.MNDT_Vars.arHalfSpeed[" + str(i) + "]"
+                ).set_value(half_speed)
+                client.get_node(
+                    "ns=2;s=Application.MNDT_Vars.arJogNegative[" + str(i) + "]"
+                ).set_value(button_state)
 
 
 def main():
-    # Connect To OPCUA Server
-    if application_settings.settings["ConnectAtStartup"] == "True":
-        connection_manager.open_client(application_settings.settings["ControllerIP"])
-
     # Tkinter Main Loop
-    user_interface.root.after(user_interface.update_loop_time, user_interface.update_loop)
+    user_interface.root.after(user_interface.update_loop_time, user_interface.startup)
     user_interface.root.mainloop()
 
 
