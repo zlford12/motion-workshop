@@ -274,7 +274,7 @@ class UserInterface:
                 width=10, bg=self.colors[3]
             )
             self.go_to_button.configure(
-                text="Go To", width=5, height=1, bg=self.colors[3]
+                text="Go To", width=5, height=1, bg=self.colors[3], command=self.go_to
             )
             self.jog_positive_slow_button.configure(
                 text=">", width=2, height=5, bg=self.colors[3]
@@ -284,11 +284,29 @@ class UserInterface:
             )
 
             # Bind Widgets
+            self.jog_negative_button.bind(
+                "<ButtonPress>", lambda state: self.jog_negative(True, False)
+            )
+            self.jog_negative_button.bind(
+                "<ButtonRelease>", lambda state: self.jog_negative(False, False)
+            )
+            self.jog_negative_slow_button.bind(
+                "<ButtonPress>", lambda state: self.jog_negative(True, True)
+            )
+            self.jog_negative_slow_button.bind(
+                "<ButtonRelease>", lambda state: self.jog_negative(False, True)
+            )
             self.jog_positive_button.bind(
                 "<ButtonPress>", lambda state: self.jog_positive(True, False)
             )
             self.jog_positive_button.bind(
                 "<ButtonRelease>", lambda state: self.jog_positive(False, False)
+            )
+            self.jog_positive_slow_button.bind(
+                "<ButtonPress>", lambda state: self.jog_positive(True, True)
+            )
+            self.jog_positive_slow_button.bind(
+                "<ButtonRelease>", lambda state: self.jog_positive(False, True)
             )
 
         def draw(self, row, column):
@@ -369,6 +387,18 @@ class UserInterface:
                 client.get_node(
                     "ns=2;s=Application.MNDT_Vars.arJogNegative[" + str(i) + "]"
                 ).set_value(button_state)
+
+        def go_to(self):
+            if connection_manager.is_connected():
+                client = connection_manager.client
+                i = self.axis.AxisData.AxisNo
+                print(self.go_to_entry.get())
+                client.get_node(
+                    "ns=2;s=Application.MNDT_Vars.arGoToPosition[" + str(i) + "]"
+                ).set_value(float(self.go_to_entry.get()))
+                client.get_node(
+                    "ns=2;s=Application.MNDT_Vars.arGoToCommand[" + str(i) + "]"
+                ).set_value(True)
 
 
 def main():
