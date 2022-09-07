@@ -2,6 +2,7 @@ from tkinter import *
 from tkinter import messagebox, font
 from background_tasks import ConnectionManagement, ApplicationSettings, Motion
 from scan_types import ScanTypes
+from opcua import ua
 
 
 class UserInterface:
@@ -130,7 +131,9 @@ class UserInterface:
 
         clear_error_button = Button(self.header)
         clear_error_button.configure(
-            text="Reset", width=button_x, height=button_y, command=self.dummy_function, bg=self.colors[3])
+            text="Reset", width=button_x, height=button_y, bg=self.colors[3],
+            command=lambda: motion.commands.command(connection_manager.client, "Reset")
+        )
         clear_error_button.grid(row=0, column=100, sticky=E, padx=10, pady=10)
 
     def draw_body(self):
@@ -396,10 +399,9 @@ class UserInterface:
             if connection_manager.is_connected():
                 client = connection_manager.client
                 i = self.axis.AxisData.AxisNo
-                print(self.go_to_entry.get())
                 client.get_node(
                     "ns=2;s=Application.MNDT_Vars.arGoToPosition[" + str(i) + "]"
-                ).set_value(float(self.go_to_entry.get()))
+                ).set_value(float(self.go_to_entry.get()), ua.VariantType.Float)
                 client.get_node(
                     "ns=2;s=Application.MNDT_Vars.arGoToCommand[" + str(i) + "]"
                 ).set_value(True)

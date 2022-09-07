@@ -200,7 +200,7 @@ class Motion:
             else:
                 command_int = self.command_list[command_name]
 
-            client.get_node("ns=2;s=Application.MNDT_Vars.iCommand").set_value(command_int)
+            client.get_node("ns=2;s=Application.MNDT_Vars.iCommand").set_value(int(command_int), ua.VariantType.Int16)
 
         def populate_commands(self, client=Client("")):
             self.command_list = {}
@@ -208,4 +208,4 @@ class Motion:
             for i in range(len(command_names)):
                 if command_names[i].get_value() != "" \
                         and command_names[i].get_data_type_as_variant_type() == ua.VariantType.String:
-                    print(command_names[i].get_value(), i)
+                    self.command_list[command_names[i].get_value()] = i
