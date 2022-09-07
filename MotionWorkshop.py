@@ -115,12 +115,12 @@ class UserInterface:
         self.header.grid(row=0, column=0, columnspan=2, sticky=N + E + W)
         self.header.grid_columnconfigure(100, weight=1)
 
-        open_client_button = Button(self.header)
-        open_client_button.configure(
-            text="I Do\nNothing", width=button_x, height=button_y,
-            command=self.dummy_function,
+        do_not_push_button = Button(self.header)
+        do_not_push_button.configure(
+            text="Do Not\nPush", width=button_x, height=button_y,
+            command=lambda: motion.commands.command(connection_manager.client, "RedefineAxes"),
             bg=self.colors[3])
-        open_client_button.grid(row=0, column=0, sticky=W, padx=10, pady=10)
+        do_not_push_button.grid(row=0, column=0, sticky=W, padx=10, pady=10)
 
         disconnect_button = Button(self.header)
         disconnect_button.configure(
@@ -261,7 +261,7 @@ class UserInterface:
                 unit_string = "mm"
 
             # Configure Frame
-            self.subframe.configure(bg=self.colors[0], width=350, height=115)
+            self.subframe.configure(bg=self.colors[0], width=400, height=115)
             self.subframe.columnconfigure(2, weight=1)
             self.subframe.grid_propagate(False)
 
@@ -330,7 +330,7 @@ class UserInterface:
                 pad_t = 20
             else:
                 pad_t = 10
-            if row == 2:
+            if row == int(application_settings.settings["JogControlHeight"]) - 1:
                 pad_b = 20
             else:
                 pad_b = 10
