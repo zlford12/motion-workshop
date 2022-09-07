@@ -1,4 +1,4 @@
-from opcua import Client
+from opcua import Client, ua
 import xml.etree.ElementTree
 
 
@@ -7,7 +7,7 @@ class ConnectionManagement:
         self.connection_desired = False
         self.connection_okay = False
         self.connection_loop_time = 0.5
-        self.client = Client("to be determined", timeout=3)
+        self.client = Client("")
         self.error = False
         self.error_message = ""
 
@@ -62,8 +62,9 @@ class ApplicationSettings:
 class Motion:
     def __init__(self):
         self.axis_file = "MachineConfig.xml"
-        self.machine_config = self.MachineConfig(self.axis_file)
         self.axis_list = [self.Axis()]
+        self.machine_config = self.MachineConfig(self.axis_file)
+        self.commands = self.Commands()
 
         self.read_axes_from_file()
 
@@ -78,7 +79,7 @@ class Motion:
             axis.AxisData.Offset = axis_element.find("Offset").text == "True"
             self.axis_list.append(axis)
 
-    def read_axes_from_system(self, client=Client("to be determined", timeout=3)):
+    def read_axes_from_system(self, client=Client("")):
         self.axis_list = []
         number_of_axes = client.get_node("ns=2;s=Application.Custom_Vars.iNumberOfAxesToVar").get_value()
         for i in range(number_of_axes):
@@ -140,7 +141,7 @@ class Motion:
             self.InPosition = False
             self.Stopping = False
 
-        def update(self, client=Client("to be determined", timeout=3)):
+        def update(self, client=Client("")):
             self.Position = \
                 client.get_node(
                     "ns=2;s=Application.MNDT_Vars.arMNDTAxisData[" + str(self.AxisNo) + "].Position"
@@ -188,3 +189,23 @@ class Motion:
 
         def read_config_from_system(self, client=Client("to be determined", timeout=3)):
             return
+
+    class Commands:
+        def __init__(self):
+            self.command_list = {}
+
+        def command(self, client=Client(""), command_name="None"):
+            if command_name == "None":
+                command_int = 0
+            else:
+                command_int = self.command_list[command_name]
+
+            client.get_node("ns=2;s=Application.MNDT_Vars.iCommand").set_value(command_int)
+
+        def populate_commands(self, client=Client("")):
+            self.command_list = {}
+            command_names = client.get_node("ns=2;s=Application.MNDT_Vars.arCommandNames").get_children()
+            for i in range(len(command_names)):
+                if command_names[i].get_value() != "" \
+                        and command_names[i].get_data_type_as_variant_type() == ua.VariantType.String:
+                    print(command_names[i].get_value(), i)

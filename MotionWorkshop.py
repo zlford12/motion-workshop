@@ -162,7 +162,7 @@ class UserInterface:
             self.jog_controls.append(self.JogControl(self.jog_frame, motion.axis_list[i], self.colors))
             self.jog_controls[i].draw(row, column)
             row += 1
-            if row > 2:
+            if row > int(application_settings.settings["JogControlHeight"]) - 1:
                 row = 0
                 column += 1
 
@@ -192,9 +192,13 @@ class UserInterface:
     def update_loop(self):
         # On Connect To PLC
         if connection_manager.is_connected() and (self.connection_status_display["text"] == "Disconnected"):
-            self.connection_status_display.configure(text="Connected")
+            # Get Data From PLC
             motion.read_axes_from_system(connection_manager.client)
             motion.machine_config.read_config_from_system(connection_manager.client)
+            motion.commands.populate_commands(connection_manager.client)
+
+            # Update UI
+            self.connection_status_display.configure(text="Connected")
             self.draw_jog_frame()
 
         # On Disconnect From PLC
