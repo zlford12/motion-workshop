@@ -3,7 +3,7 @@ from tkinter import messagebox, font
 from ConnectionManagement import ConnectionManagement
 from ApplicationSettings import ApplicationSettings
 from Motion import Motion
-from scan_types import ScanTypes
+from ScanTypes import ScanTypes
 from opcua import ua
 from Axis import Axis
 
