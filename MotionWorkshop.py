@@ -1,8 +1,11 @@
 from tkinter import *
 from tkinter import messagebox, font
-from background_tasks import ConnectionManagement, ApplicationSettings, Motion
+from ConnectionManagement import ConnectionManagement
+from ApplicationSettings import ApplicationSettings
+from Motion import Motion
 from scan_types import ScanTypes
 from opcua import ua
+from Axis import Axis
 
 
 class UserInterface:
@@ -52,7 +55,7 @@ class UserInterface:
         self.scan_controls = None
 
         # Jog Frame Elements
-        self.jog_controls = [self.JogControl(self.jog_frame, motion.Axis, self.colors)]
+        self.jog_controls = [self.JogControl(self.jog_frame, Axis, self.colors)]
 
         # Footer Elements
         self.connection_status_display = None
@@ -216,7 +219,7 @@ class UserInterface:
         # Update Axis Data
         if connection_manager.is_connected():
             for axis in motion.axis_list:
-                axis.AxisData.update(connection_manager.client)
+                axis.axis_data.update(connection_manager.client)
 
         # Update Jog Controls
         for x in self.jog_controls:
@@ -255,7 +258,7 @@ class UserInterface:
 
         def configure(self):
             # Unit
-            if self.axis.AxisData.Rotary:
+            if self.axis.axis_data.Rotary:
                 unit_string = "°"
             else:
                 unit_string = "mm"
@@ -273,8 +276,8 @@ class UserInterface:
                 text="<", width=2, height=5, bg=self.colors[3]
             )
             self.axis_position_label.configure(
-                text=self.axis.AxisData.Name + " \n" +
-                str(round(self.axis.AxisData.Position, 2)) + " " + unit_string,
+                text=self.axis.axis_data.Name + " \n" +
+                str(round(self.axis.axis_data.Position, 2)) + " " + unit_string,
                 bg=self.colors[0], fg=self.colors[5], justify=LEFT, font=("Arial Black", 12)
             )
             self.go_to_entry.configure(
@@ -361,22 +364,22 @@ class UserInterface:
 
         def update(self):
             # Unit
-            if self.axis.AxisData.Rotary:
+            if self.axis.axis_data.Rotary:
                 unit_string = "°"
             else:
                 unit_string = "mm"
 
             # Update Widgets
             self.axis_position_label.configure(
-                text=self.axis.AxisData.Name + " \n" +
-                str(round(self.axis.AxisData.Position, 2)) + " " + unit_string,
+                text=self.axis.axis_data.Name + " \n" +
+                str(round(self.axis.axis_data.Position, 2)) + " " + unit_string,
                 bg=self.colors[0], fg=self.colors[5], justify=LEFT, font=("Arial Black", 12)
             )
 
         def jog_positive(self, button_state, half_speed):
             if connection_manager.is_connected():
                 client = connection_manager.client
-                i = self.axis.AxisData.AxisNo
+                i = self.axis.axis_data.AxisNo
                 client.get_node(
                     "ns=2;s=Application.MNDT_Vars.arHalfSpeed[" + str(i) + "]"
                 ).set_value(half_speed)
@@ -387,7 +390,7 @@ class UserInterface:
         def jog_negative(self, button_state, half_speed):
             if connection_manager.is_connected():
                 client = connection_manager.client
-                i = self.axis.AxisData.AxisNo
+                i = self.axis.axis_data.AxisNo
                 client.get_node(
                     "ns=2;s=Application.MNDT_Vars.arHalfSpeed[" + str(i) + "]"
                 ).set_value(half_speed)
@@ -398,7 +401,7 @@ class UserInterface:
         def go_to(self):
             if connection_manager.is_connected():
                 client = connection_manager.client
-                i = self.axis.AxisData.AxisNo
+                i = self.axis.axis_data.AxisNo
                 client.get_node(
                     "ns=2;s=Application.MNDT_Vars.arGoToPosition[" + str(i) + "]"
                 ).set_value(float(self.go_to_entry.get()), ua.VariantType.Float)
