@@ -1,6 +1,6 @@
-from Axis import Axis
-from MachineConfig import MachineConfig
-from Commands import Commands
+from motion.Axis import Axis
+from motion.MachineConfig import MachineConfig
+from motion.Commands import Commands
 from opcua import Client
 import xml.etree.ElementTree
 

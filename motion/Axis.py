@@ -1,5 +1,5 @@
-from AxisData import AxisData
-from AxisLimits import AxisLimits
+from motion.AxisData import AxisData
+from motion.AxisLimits import AxisLimits
 
 
 class Axis:

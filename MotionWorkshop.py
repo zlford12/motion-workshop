@@ -1,23 +1,23 @@
 from tkinter import *
 from tkinter import messagebox, font
-from ConnectionManagement import ConnectionManagement
-from ApplicationSettings import ApplicationSettings
-from Motion import Motion
-from ScanTypes import ScanTypes
-from opcua import ua
-from Axis import Axis
+from gui.ScanTypes import ScanTypes
+from gui.JogControl import JogControl
+from motion.Motion import Motion
+from motion.Axis import Axis
+from utility.ConnectionManagement import ConnectionManagement
+from utility.ApplicationSettings import ApplicationSettings
 
 
 class UserInterface:
     def __init__(self):
         # Color Scheme
         self.colors = [
-            "#000000",  # main frame, jog control background, dark text color
-            "#333333",  # jog control frame background
-            "#555555",  # header and footer background
-            "#999999",  # header button color, scan frame background
-            "#cccccc",  # scan frame button color
-            "#FFFFFF"  # light text color
+            "#000000",  # 0 - main frame, jog control background, dark text color
+            "#333333",  # 1 - jog control frame background
+            "#555555",  # 2 - header and footer background
+            "#999999",  # 3 - header button color, scan frame background
+            "#cccccc",  # 4 - scan frame button color
+            "#FFFFFF"   # 5 - light text color
         ]
 
         # Root Window
@@ -55,7 +55,7 @@ class UserInterface:
         self.scan_controls = None
 
         # Jog Frame Elements
-        self.jog_controls = [self.JogControl(self.jog_frame, Axis, self.colors)]
+        self.jog_controls = [JogControl(self.jog_frame, Axis, self.colors)]
 
         # Footer Elements
         self.connection_status_display = None
@@ -165,7 +165,10 @@ class UserInterface:
         row = 0
         column = 0
         for i in range(len(motion.axis_list)):
-            self.jog_controls.append(self.JogControl(self.jog_frame, motion.axis_list[i], self.colors))
+            self.jog_controls.append(JogControl(
+                self.jog_frame, motion.axis_list[i], self.colors,
+                connection_manager, application_settings
+            ))
             self.jog_controls[i].draw(row, column)
             row += 1
             if row > int(application_settings.settings["JogControlHeight"]) - 1:
@@ -238,176 +241,6 @@ class UserInterface:
 
     def dummy_function(self):
         return
-
-    class JogControl:
-        def __init__(self, frame, axis, colors):
-            # Create Frame
-            self.frame = frame
-            self.axis = axis
-            self.colors = colors
-            self.subframe = Frame(self.frame)
-
-            # Create Widgets
-            self.jog_negative_button = Button(self.subframe)
-            self.jog_negative_slow_button = Button(self.subframe)
-            self.axis_position_label = Label(self.subframe)
-            self.go_to_entry = Entry(self.subframe)
-            self.go_to_button = Button(self.subframe)
-            self.jog_positive_button = Button(self.subframe)
-            self.jog_positive_slow_button = Button(self.subframe)
-
-        def configure(self):
-            # Unit
-            if self.axis.axis_data.Rotary:
-                unit_string = "°"
-            else:
-                unit_string = "mm"
-
-            # Configure Frame
-            self.subframe.configure(bg=self.colors[0], width=400, height=115)
-            self.subframe.columnconfigure(2, weight=1)
-            self.subframe.grid_propagate(False)
-
-            # Configure Widgets
-            self.jog_negative_button.configure(
-                text="<<", width=2, height=5, bg=self.colors[3]
-            )
-            self.jog_negative_slow_button.configure(
-                text="<", width=2, height=5, bg=self.colors[3]
-            )
-            self.axis_position_label.configure(
-                text=self.axis.axis_data.Name + " \n" +
-                str(round(self.axis.axis_data.Position, 2)) + " " + unit_string,
-                bg=self.colors[0], fg=self.colors[5], justify=LEFT, font=("Arial Black", 12)
-            )
-            self.go_to_entry.configure(
-                width=10, bg=self.colors[3]
-            )
-            self.go_to_button.configure(
-                text="Go To", width=5, height=1, bg=self.colors[3], command=self.go_to
-            )
-            self.jog_positive_slow_button.configure(
-                text=">", width=2, height=5, bg=self.colors[3]
-            )
-            self.jog_positive_button.configure(
-                text=">>", width=2, height=5, bg=self.colors[3]
-            )
-
-            # Bind Widgets
-            self.jog_negative_button.bind(
-                "<ButtonPress>", lambda state: self.jog_negative(True, False)
-            )
-            self.jog_negative_button.bind(
-                "<ButtonRelease>", lambda state: self.jog_negative(False, False)
-            )
-            self.jog_negative_slow_button.bind(
-                "<ButtonPress>", lambda state: self.jog_negative(True, True)
-            )
-            self.jog_negative_slow_button.bind(
-                "<ButtonRelease>", lambda state: self.jog_negative(False, True)
-            )
-            self.jog_positive_button.bind(
-                "<ButtonPress>", lambda state: self.jog_positive(True, False)
-            )
-            self.jog_positive_button.bind(
-                "<ButtonRelease>", lambda state: self.jog_positive(False, False)
-            )
-            self.jog_positive_slow_button.bind(
-                "<ButtonPress>", lambda state: self.jog_positive(True, True)
-            )
-            self.jog_positive_slow_button.bind(
-                "<ButtonRelease>", lambda state: self.jog_positive(False, True)
-            )
-
-        def draw(self, row, column):
-            # Configure Widgets
-            self.configure()
-
-            # Draw Frame
-            if column == 0:
-                pad_l = 20
-            else:
-                pad_l = 10
-            pad_r = 10
-            if row == 0:
-                pad_t = 20
-            else:
-                pad_t = 10
-            if row == int(application_settings.settings["JogControlHeight"]) - 1:
-                pad_b = 20
-            else:
-                pad_b = 10
-            self.subframe.grid(row=row, column=column, padx=(pad_l, pad_r), pady=(pad_t, pad_b))
-
-            # Draw Widgets
-            self.jog_negative_button.grid(
-                row=0, column=0, rowspan=2, padx=(5, 0), pady=5
-            )
-            self.jog_negative_slow_button.grid(
-                row=0, column=1, rowspan=2, pady=5
-            )
-            self.axis_position_label.grid(
-                row=0, column=2, padx=30, pady=5, rowspan=2, sticky=W
-            )
-            self.go_to_entry.grid(
-                row=0, column=3, padx=10, pady=(10, 0), sticky=S
-            )
-            self.go_to_button.grid(
-                row=1, column=3, padx=5, pady=5
-            )
-            self.jog_positive_slow_button.grid(
-                row=0, column=4, rowspan=2, pady=5
-            )
-            self.jog_positive_button.grid(
-                row=0, column=5, rowspan=2, padx=(0, 5), pady=5
-            )
-
-        def update(self):
-            # Unit
-            if self.axis.axis_data.Rotary:
-                unit_string = "°"
-            else:
-                unit_string = "mm"
-
-            # Update Widgets
-            self.axis_position_label.configure(
-                text=self.axis.axis_data.Name + " \n" +
-                str(round(self.axis.axis_data.Position, 2)) + " " + unit_string,
-                bg=self.colors[0], fg=self.colors[5], justify=LEFT, font=("Arial Black", 12)
-            )
-
-        def jog_positive(self, button_state, half_speed):
-            if connection_manager.is_connected():
-                client = connection_manager.client
-                i = self.axis.axis_data.AxisNo
-                client.get_node(
-                    "ns=2;s=Application.MNDT_Vars.arHalfSpeed[" + str(i) + "]"
-                ).set_value(half_speed)
-                client.get_node(
-                    "ns=2;s=Application.MNDT_Vars.arJogPositive[" + str(i) + "]"
-                ).set_value(button_state)
-
-        def jog_negative(self, button_state, half_speed):
-            if connection_manager.is_connected():
-                client = connection_manager.client
-                i = self.axis.axis_data.AxisNo
-                client.get_node(
-                    "ns=2;s=Application.MNDT_Vars.arHalfSpeed[" + str(i) + "]"
-                ).set_value(half_speed)
-                client.get_node(
-                    "ns=2;s=Application.MNDT_Vars.arJogNegative[" + str(i) + "]"
-                ).set_value(button_state)
-
-        def go_to(self):
-            if connection_manager.is_connected():
-                client = connection_manager.client
-                i = self.axis.axis_data.AxisNo
-                client.get_node(
-                    "ns=2;s=Application.MNDT_Vars.arGoToPosition[" + str(i) + "]"
-                ).set_value(float(self.go_to_entry.get()), ua.VariantType.Float)
-                client.get_node(
-                    "ns=2;s=Application.MNDT_Vars.arGoToCommand[" + str(i) + "]"
-                ).set_value(True)
 
 
 def main():
