@@ -36,16 +36,16 @@ class JogControl:
             unit_string = "mm"
 
         # Configure Frame
-        self.subframe.configure(bg=self.colors[0], width=400, height=115)
+        self.subframe.configure(bg=self.colors[0], width=350, height=114)
         self.subframe.columnconfigure(2, weight=1)
         self.subframe.grid_propagate(False)
 
         # Configure Widgets
         self.jog_negative_button.configure(
-            text="<<", width=2, height=5, bg=self.colors[3]
+            text="-\n<<", width=2, height=5, bg=self.colors[3]
         )
         self.jog_negative_slow_button.configure(
-            text="<", width=2, height=5, bg=self.colors[3]
+            text="-\n<", width=2, height=5, bg=self.colors[3]
         )
         self.axis_position_label.configure(
             text=self.axis.axis_data.Name + " \n" +
@@ -59,10 +59,10 @@ class JogControl:
             text="Go To", width=5, height=1, bg=self.colors[3], command=self.go_to
         )
         self.jog_positive_slow_button.configure(
-            text=">", width=2, height=5, bg=self.colors[3]
+            text="+\n>", width=2, height=5, bg=self.colors[3]
         )
         self.jog_positive_button.configure(
-            text=">>", width=2, height=5, bg=self.colors[3]
+            text="+\n>>", width=2, height=5, bg=self.colors[3]
         )
 
         # Bind Widgets
@@ -97,18 +97,18 @@ class JogControl:
 
         # Draw Frame
         if column == 0:
-            pad_l = 20
-        else:
             pad_l = 10
-        pad_r = 10
+        else:
+            pad_l = 5
+        pad_r = 5
         if row == 0:
-            pad_t = 20
-        else:
             pad_t = 10
-        if row == int(self.application_settings.settings["JogControlHeight"]) - 1:
-            pad_b = 20
         else:
+            pad_t = 5
+        if row == int(self.application_settings.settings["JogControlHeight"]) - 1:
             pad_b = 10
+        else:
+            pad_b = 5
         self.subframe.grid(row=row, column=column, padx=(pad_l, pad_r), pady=(pad_t, pad_b))
 
         # Draw Widgets
@@ -119,7 +119,7 @@ class JogControl:
             row=0, column=1, rowspan=2, pady=5
         )
         self.axis_position_label.grid(
-            row=0, column=2, padx=30, pady=5, rowspan=2, sticky=W
+            row=0, column=2, padx=10, pady=5, rowspan=2, sticky=W
         )
         self.go_to_entry.grid(
             row=0, column=3, padx=10, pady=(10, 0), sticky=S
