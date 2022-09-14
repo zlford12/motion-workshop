@@ -36,16 +36,16 @@ class JogControl:
             unit_string = "mm"
 
         # Configure Frame
-        self.subframe.configure(bg=self.colors[0], width=350, height=114)
+        self.subframe.configure(bg=self.colors[0], width=350, height=95)
         self.subframe.columnconfigure(2, weight=1)
         self.subframe.grid_propagate(False)
 
         # Configure Widgets
         self.jog_negative_button.configure(
-            text="-\n<<", width=2, height=5, bg=self.colors[3]
+            text="<<", width=2, height=4, bg=self.colors[3]
         )
         self.jog_negative_slow_button.configure(
-            text="-\n<", width=2, height=5, bg=self.colors[3]
+            text="<", width=2, height=4, bg=self.colors[3]
         )
         self.axis_position_label.configure(
             text=self.axis.axis_data.Name + " \n" +
@@ -59,10 +59,10 @@ class JogControl:
             text="Go To", width=5, height=1, bg=self.colors[3], command=self.go_to
         )
         self.jog_positive_slow_button.configure(
-            text="+\n>", width=2, height=5, bg=self.colors[3]
+            text=">", width=2, height=4, bg=self.colors[3]
         )
         self.jog_positive_button.configure(
-            text="+\n>>", width=2, height=5, bg=self.colors[3]
+            text=">>", width=2, height=4, bg=self.colors[3]
         )
 
         # Bind Widgets
@@ -174,6 +174,9 @@ class JogControl:
         if self.connection_manager.is_connected():
             client = self.connection_manager.client
             i = self.axis.axis_data.AxisNo
+            client.get_node(
+                "ns=2;s=Application.MNDT_Vars.arHalfSpeed[" + str(i) + "]"
+            ).set_value(False)
             client.get_node(
                 "ns=2;s=Application.MNDT_Vars.arGoToPosition[" + str(i) + "]"
             ).set_value(float(self.go_to_entry.get()), ua.VariantType.Float)

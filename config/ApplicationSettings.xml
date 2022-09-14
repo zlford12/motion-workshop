@@ -2,5 +2,5 @@
 <settings>
   <ControllerIP>192.168.88.23</ControllerIP>
   <ConnectAtStartup>True</ConnectAtStartup>
-  <JogControlHeight>5</JogControlHeight>
+  <JogControlHeight>3</JogControlHeight>
 </settings>

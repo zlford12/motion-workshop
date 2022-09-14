@@ -50,7 +50,8 @@ class UserInterface:
         self.header = Frame(self.root)
         self.body = Frame(self.root)
         self.scan_frame = Frame(self.root)
-        self.jog_frame = Frame(self.root)
+        self.jog_canvas = Canvas(self.root)
+        self.jog_scroll = Scrollbar(self.root)
         self.footer = Frame(self.root)
 
         # Header Elements
@@ -62,6 +63,7 @@ class UserInterface:
         self.scan_controls = None
 
         # Jog Frame Elements
+        self.jog_frame = Frame(self.jog_canvas)
         self.jog_controls = [JogControl(self.jog_frame, Axis, self.colors)]
 
         # Footer Elements
@@ -153,7 +155,7 @@ class UserInterface:
     def draw_scan_frame(self):
 
         self.scan_frame.configure(bg=self.colors[3])
-        self.scan_frame.grid(row=1, column=1, rowspan=2, sticky=E + N + S)
+        self.scan_frame.grid(row=1, column=1, rowspan=3, sticky=E + N + S)
 
         if self.selected_scan_mode is None:
             self.selected_scan_mode = self.motion.machine_config.default_scan_type
@@ -162,9 +164,6 @@ class UserInterface:
         self.scan_controls.draw()
 
     def draw_jog_frame(self):
-        self.jog_frame.configure(bg=self.colors[1])
-        self.jog_frame.grid(row=2, column=0, sticky=S + E + W)
-
         for child in self.jog_frame.winfo_children():
             child.destroy()
 
@@ -182,11 +181,25 @@ class UserInterface:
                 row = 0
                 column += 1
 
+        self.jog_scroll.configure(orient="horizontal", command=self.jog_canvas.xview)
+
+        self.jog_canvas.create_window(0, 0, anchor=NW, window=self.jog_frame)
+        self.jog_canvas.update_idletasks()
+        self.jog_canvas.configure(
+            bg=self.colors[1], scrollregion=self.jog_canvas.bbox("all"),
+            highlightthickness=0, xscrollcommand=self.jog_scroll.set
+        )
+        self.jog_frame.configure(bg=self.colors[1])
+
+        self.jog_canvas.grid(row=2, column=0, sticky=S + E + W)
+        self.jog_frame.grid(row=0, column=0)
+        self.jog_scroll.grid(row=3, column=0, sticky=S + E + W)
+
     def draw_footer(self):
 
         self.footer.configure(bg=self.colors[2], height=20)
         self.footer.columnconfigure(100, weight=1)
-        self.footer.grid(row=3, column=0, columnspan=2, sticky=S + E + W)
+        self.footer.grid(row=4, column=0, columnspan=2, sticky=S + E + W)
         local_font = ("Arial", 10)
 
         for child in self.footer.winfo_children():
