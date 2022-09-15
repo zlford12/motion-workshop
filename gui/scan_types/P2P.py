@@ -38,7 +38,7 @@ class P2P:
             width=10
         )
 
-    def draw(self):
+    def draw_controls(self):
         # Configure Widgets
         self.configure()
 

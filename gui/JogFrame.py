@@ -26,6 +26,10 @@ class JogFrame:
         self.jog_controls = JogControl
 
     def draw(self):
+        # Delete Jog Controls
+        for child in self.jog_frame.winfo_children():
+            child.destroy()
+
         # Configure Jog UI
         self.jog_canvas.configure(
             bg=self.colors[1], highlightthickness=0, xscrollcommand=self.jog_scroll.set
@@ -40,9 +44,9 @@ class JogFrame:
         for i in range(len(self.motion.axis_list)):
             self.jog_controls.append(JogControl(
                 self.jog_frame, self.motion.axis_list[i], self.colors,
-                self.connection_manager, self.application_settings
+                self.connection_manager, self.application_settings, self.motion
             ))
-            self.jog_controls[i].draw(row, column)
+            self.jog_controls[i].draw_controls(row, column)
             row += 1
             if row > int(self.application_settings.settings["JogControlHeight"]) - 1:
                 row = 0

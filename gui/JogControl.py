@@ -1,24 +1,30 @@
 from tkinter import *
 from opcua import ua
+from motion.Motion import Motion
 from utility.ApplicationSettings import ApplicationSettings
 from utility.ConnectionManagement import ConnectionManagement
 
 
+# noinspection PyArgumentList
 class JogControl:
     def __init__(
             self, jog_frame, axis, colors,
-            connection_manager: ConnectionManagement, application_settings: ApplicationSettings
+            connection_manager: ConnectionManagement, application_settings: ApplicationSettings, motion: Motion
     ):
         # Class Objects
         self.connection_manager = connection_manager
         self.application_settings = application_settings
+        self.motion = motion
+
+        # Coordinates
+        self.row = None
+        self.column = None
 
         # Create Frame
         self.jog_frame = jog_frame
         self.axis = axis
         self.colors = colors
         self.subframe = Frame(self.jog_frame)
-        self.settings_frame = Frame(self.jog_frame)
 
         # Create Widgets
         self.jog_negative_button = Button(self.subframe)
@@ -28,18 +34,24 @@ class JogControl:
         self.go_to_button = Button(self.subframe)
         self.jog_positive_button = Button(self.subframe)
         self.jog_positive_slow_button = Button(self.subframe)
+        self.settings_canvas = Canvas(self.subframe)
 
-    def configure(self):
+        # Create Settings Widgets
+
+    def configure_controls(self):
         # Unit
         if self.axis.axis_data.Rotary:
-            unit_string = "°"
+            position_unit = "°"
         else:
-            unit_string = "mm"
+            position_unit = "mm"
 
-        # Configure Frame
-        self.subframe.configure(bg=self.colors[0], width=350, height=95)
+        # Configure Frames
+        self.subframe.configure(bg=self.colors[0], width=400, height=95)
+        self.settings_canvas.configure(bg=self.colors[0], width=50, height=95, highlightthickness=0)
+        self.settings_canvas.create_text(25, 50, text="Settings", angle=90, fill=self.colors[5])
         self.subframe.columnconfigure(2, weight=1)
         self.subframe.grid_propagate(False)
+        self.settings_canvas.grid_propagate(False)
 
         # Configure Widgets
         self.jog_negative_button.configure(
@@ -50,7 +62,7 @@ class JogControl:
         )
         self.axis_position_label.configure(
             text=self.axis.axis_data.Name + " \n" +
-            str(round(self.axis.axis_data.Position, 2)) + " " + unit_string,
+            str(round(self.axis.axis_data.Position, 2)) + " " + position_unit,
             bg=self.colors[0], fg=self.colors[5], justify=LEFT, font=("Arial Black", 12)
         )
         self.go_to_entry.configure(
@@ -91,10 +103,27 @@ class JogControl:
         self.jog_positive_slow_button.bind(
             "<ButtonRelease>", lambda state: self.jog_positive(False, True)
         )
+        self.settings_canvas.bind(
+            "<Enter>", lambda state: self.recolor_settings(True)
+        )
+        self.settings_canvas.bind(
+            "<Leave>", lambda state: self.recolor_settings(False)
+        )
+        self.settings_canvas.bind(
+            "<ButtonPress>", lambda instance: self.draw_settings()
+        )
 
-    def draw(self, row, column):
+    def draw_controls(self, row, column):
+        # Save Coordinates
+        self.row = row
+        self.column = column
+
+        # Clear Subframe
+        for child in self.subframe.winfo_children():
+            child.grid_forget()
+
         # Configure Widgets
-        self.configure()
+        self.configure_controls()
 
         # Draw Frame
         if column == 0:
@@ -111,6 +140,7 @@ class JogControl:
         else:
             pad_b = 5
         self.subframe.grid(row=row, column=column, padx=(pad_l, pad_r), pady=(pad_t, pad_b))
+        self.settings_canvas.grid(row=0, column=6, rowspan=2)
 
         # Draw Widgets
         self.jog_negative_button.grid(
@@ -149,6 +179,65 @@ class JogControl:
             bg=self.colors[0], fg=self.colors[5], justify=LEFT, font=("Arial Black", 12)
         )
 
+    def configure_settings(self):
+        # Unit
+        # if self.axis.axis_data.Rotary:
+        #     position_unit = "°"
+        #     velocity_unit = "RPM"
+        #     acceleration_unit = "rad/s^2"
+        # else:
+        #     position_unit = "mm"
+        #     velocity_unit = "mm/min"
+        #     acceleration_unit = "mm/s^2"
+
+        # Configure Frames
+        self.subframe.configure(bg=self.colors[0], width=400, height=95)
+        self.settings_canvas.configure(bg=self.colors[0], width=50, height=95, highlightthickness=0)
+        self.settings_canvas.create_text(25, 600, text="Exit", angle=90, fill=self.colors[5])
+        self.subframe.columnconfigure(2, weight=1)
+        self.subframe.grid_propagate(False)
+        self.settings_canvas.grid_propagate(False)
+
+        # Configure Widgets
+
+        # Bind Widgets
+        self.settings_canvas.bind(
+            "<Enter>", lambda state: self.recolor_settings(True)
+        )
+        self.settings_canvas.bind(
+            "<Leave>", lambda state: self.recolor_settings(False)
+        )
+        self.settings_canvas.bind(
+            "<ButtonPress>", lambda coordinates: self.draw_controls(self.row, self.column)
+        )
+
+    def draw_settings(self):
+        # Clear Subframe
+        for child in self.subframe.winfo_children():
+            child.grid_forget()
+
+        # Configure Widgets
+        self.configure_settings()
+
+        # Draw Frame
+        if self.column == 0:
+            pad_l = 10
+        else:
+            pad_l = 5
+        pad_r = 5
+        if self.row == 0:
+            pad_t = 10
+        else:
+            pad_t = 5
+        if self.row == int(self.application_settings.settings["JogControlHeight"]) - 1:
+            pad_b = 10
+        else:
+            pad_b = 5
+        self.subframe.grid(row=self.row, column=self.column, padx=(pad_l, pad_r), pady=(pad_t, pad_b))
+        self.settings_canvas.grid(row=0, column=6, rowspan=2)
+
+        # Draw Widgets
+
     def jog_positive(self, button_state, half_speed):
         if self.connection_manager.is_connected():
             client = self.connection_manager.client
@@ -184,3 +273,9 @@ class JogControl:
             client.get_node(
                 "ns=2;s=Application.MNDT_Vars.arGoToCommand[" + str(i) + "]"
             ).set_value(True)
+
+    def recolor_settings(self, hover_state):
+        if hover_state:
+            self.settings_canvas.configure(bg=self.colors[6])
+        else:
+            self.settings_canvas.configure(bg=self.colors[0])

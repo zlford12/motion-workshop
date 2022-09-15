@@ -29,7 +29,8 @@ class UserInterface:
             "#555555",  # 2 - header and footer background
             "#999999",  # 3 - header button color, scan frame background
             "#cccccc",  # 4 - scan frame button color
-            "#FFFFFF"   # 5 - light text color
+            "#FFFFFF",  # 5 - light text color
+            "#000044"   # 6 - hover highlight color
         ]
 
         # Root Window
@@ -94,13 +95,13 @@ class UserInterface:
                 self.motion.commands.populate_commands(self.connection_manager.client)
 
                 # Update UI
-                self.footer.connection_status_display.configure(text="Connected")
+                self.footer.connection_status_display.configure_controls(text="Connected")
                 self.jog_frame.draw()
 
             # On Disconnect From PLC
             if not self.connection_manager.is_connected() and \
                     (self.footer.connection_status_display["text"] == "Connected"):
-                self.footer.connection_status_display.configure(text="Disconnected")
+                self.footer.connection_status_display.configure_controls(text="Disconnected")
 
             # Update Axis Data
             for axis in self.motion.axis_list:
