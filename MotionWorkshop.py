@@ -10,7 +10,7 @@ def main():
     update_thread = threading.Thread(target=user_interface.update_loop, daemon=True)
 
     # Tkinter Main Loop
-    user_interface.root.after(user_interface.update_loop_time, lambda: user_interface.startup(update_thread))
+    user_interface.root.after(user_interface.update_loop_wait_time, lambda: user_interface.startup(update_thread))
     user_interface.root.mainloop()
 
 

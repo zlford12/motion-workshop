@@ -42,7 +42,6 @@ class JogFrame:
                 self.jog_frame, self.motion.axis_list[i], self.colors,
                 self.connection_manager, self.application_settings
             ))
-            print(self.motion.axis_list[i].axis_data.Name)
             self.jog_controls[i].draw(row, column)
             row += 1
             if row > int(self.application_settings.settings["JogControlHeight"]) - 1:

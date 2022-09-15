@@ -68,7 +68,8 @@ class UserInterface:
 
         # Update Loop
         self.stop_update = True
-        self.update_loop_time = 200
+        self.update_loop_wait_time = 200
+        self.last_update_loop_time = None
 
     def create_menubar(self):
         # File Menu
@@ -156,6 +157,9 @@ class UserInterface:
 
     def update_loop(self):
         while not self.stop_update:
+            # Measure Start Time
+            start_time = time.time()
+
             # On Connect To PLC
             if self.connection_manager.is_connected() and (self.connection_status_display["text"] == "Disconnected"):
                 # Get Data From PLC
@@ -172,8 +176,8 @@ class UserInterface:
                 self.connection_status_display.configure(text="Disconnected")
 
             # Update Axis Data
-            if self.connection_manager.is_connected():
-                for axis in self.motion.axis_list:
+            for axis in self.motion.axis_list:
+                if self.connection_manager.is_connected():
                     axis.axis_data.update(self.connection_manager.client)
 
             # Check For Connection Management Error
@@ -185,18 +189,22 @@ class UserInterface:
             for axis in self.motion.axis_list:
                 if axis.axis_data.communication_error:
                     axis.axis_data.communication_error = False
-                    messagebox.showerror(title="Axis Data Error", message=axis.axis_data.error_message)
+                    if self.connection_manager.connection_desired:
+                        messagebox.showerror(title="Connection Error", message="Failed To Get Axis Data")
 
             # Update Jog Controls
             for x in self.jog_frame.jog_controls:
                 x.update()
 
             # Wait
-            time.sleep(self.update_loop_time / 1000)
+            time.sleep(self.update_loop_wait_time / 1000)
+
+            # Measure Update Loop Time
+            self.last_update_loop_time = time.time() - start_time
 
     def cleanup(self):
         self.stop_update = True
-        time.sleep(self.update_loop_time / 1000)
+        time.sleep(self.last_update_loop_time)
         self.connection_manager.disconnect()
         self.root.update()
         self.root.destroy()

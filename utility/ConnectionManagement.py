@@ -1,4 +1,5 @@
 from opcua import Client
+import time
 
 
 class ConnectionManagement:
@@ -39,8 +40,9 @@ class ConnectionManagement:
     def disconnect(self):
         try:
             if self.connection_desired:
-                self.client.disconnect()
                 self.connection_desired = False
+                time.sleep(0.2)
+                self.client.disconnect()
         except Exception as e:
             self.error = True
             self.error_message = e
