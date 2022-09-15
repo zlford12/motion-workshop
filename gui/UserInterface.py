@@ -2,9 +2,12 @@ import threading
 import time
 from tkinter import *
 from tkinter import messagebox, font
+from gui.Body import Body
+from gui.Footer import Footer
 from gui.Header import Header
 from gui.JogFrame import JogFrame
-from gui.ScanTypes import ScanTypes
+from gui.MenuBar import MenuBar
+from gui.ScanFrame import ScanFrame
 from motion.Motion import Motion
 from utility.ConnectionManagement import ConnectionManagement
 from utility.ApplicationSettings import ApplicationSettings
@@ -48,95 +51,17 @@ class UserInterface:
         )
 
         # Window Elements
-        self.menu_bar = Menu(self.root)
+        self.menu_bar = MenuBar(self.colors, self.root, connection_manager, application_settings, motion)
         self.header = Header(self.colors, self.root, connection_manager, application_settings, motion)
-        self.body = Frame(self.root)
+        self.body = Body(self.colors, self.root, connection_manager, application_settings, motion)
         self.jog_frame = JogFrame(self.colors, self.root, connection_manager, application_settings, motion)
-        self.scan_frame = Frame(self.root)
-        self.footer = Frame(self.root)
-
-        # Scan Frame Elements
-        self.selected_scan_mode = None
-        self.scan_types = ScanTypes()
-        self.scan_controls = None
-
-        # Header Elements
-        self.HeaderElement = None
-
-        # Footer Elements
-        self.connection_status_display = None
+        self.scan_frame = ScanFrame(self.colors, self.root, connection_manager, application_settings, motion)
+        self.footer = Footer(self.colors, self.root, connection_manager, application_settings, motion)
 
         # Update Loop
         self.stop_update = True
         self.update_loop_wait_time = 200
         self.last_update_loop_time = None
-
-    def create_menubar(self):
-        # File Menu
-        file_menu = Menu(self.menu_bar, tearoff=0)
-        file_menu.add_command(
-            label="Open",
-            command=self.dummy_function
-        )
-        file_menu.add_command(
-            label="Application Settings",
-            command=self.dummy_function
-        )
-
-        # System Menu
-        system_menu = Menu(self.menu_bar, tearoff=0)
-        system_menu.add_command(
-            label="Connect To PLC",
-            command=lambda: self.connection_manager.open_client(self.application_settings.settings["ControllerIP"])
-        )
-        system_menu.add_command(
-            label="Disconnect From PLC",
-            command=self.connection_manager.disconnect
-        )
-        system_menu.add_command(
-            label="Machine Configuration",
-            command=self.dummy_function
-        )
-        system_menu.add_command(
-            label="Change Scan Type",
-            command=self.dummy_function
-        )
-
-        # Display Menus
-        self.menu_bar.add_cascade(label="File", menu=file_menu)
-        self.menu_bar.add_cascade(label="System", menu=system_menu)
-
-        # Display Menubar
-        self.root.configure(menu=self.menu_bar)
-
-    def draw_body(self):
-        self.body.configure(bg=self.colors[0])
-        self.body.grid(row=1, column=0, sticky=N + E + S + W)
-
-    def draw_scan_frame(self):
-
-        self.scan_frame.configure(bg=self.colors[3])
-        self.scan_frame.grid(row=1, column=1, rowspan=3, sticky=E + N + S)
-
-        if self.selected_scan_mode is None:
-            self.selected_scan_mode = self.motion.machine_config.default_scan_type
-
-        self.scan_controls = self.scan_types.scan_types[self.selected_scan_mode](self.scan_frame, self.colors)
-        self.scan_controls.draw()
-
-    def draw_footer(self):
-
-        self.footer.configure(bg=self.colors[2], height=20)
-        self.footer.columnconfigure(100, weight=1)
-        self.footer.grid(row=4, column=0, columnspan=2, sticky=S + E + W)
-        local_font = ("Arial", 10)
-
-        for child in self.footer.winfo_children():
-            child.destroy()
-
-        self.connection_status_display = Label(self.footer)
-        self.connection_status_display.configure(text="Disconnected", bg=self.colors[2], font=local_font)
-        self.connection_status_display.grid(row=0, column=100, padx=10, sticky=E)
 
     def startup(self, loop_thread: threading.Thread):
         # Connect To OPCUA Server
@@ -145,11 +70,11 @@ class UserInterface:
 
         # Draw UI
         self.header.draw_header()
-        self.create_menubar()
-        self.draw_body()
-        self.draw_scan_frame()
+        self.menu_bar.create_menubar()
+        self.body.draw_body()
+        self.scan_frame.draw_scan_frame()
         self.jog_frame.draw()
-        self.draw_footer()
+        self.footer.draw_footer()
 
         # Start Update Loop
         self.stop_update = False
@@ -161,19 +86,21 @@ class UserInterface:
             start_time = time.time()
 
             # On Connect To PLC
-            if self.connection_manager.is_connected() and (self.connection_status_display["text"] == "Disconnected"):
+            if self.connection_manager.is_connected() and \
+                    (self.footer.connection_status_display["text"] == "Disconnected"):
                 # Get Data From PLC
                 self.motion.read_axes_from_system(self.connection_manager.client)
                 self.motion.machine_config.read_config_from_system(self.connection_manager.client)
                 self.motion.commands.populate_commands(self.connection_manager.client)
 
                 # Update UI
-                self.connection_status_display.configure(text="Connected")
+                self.footer.connection_status_display.configure(text="Connected")
                 self.jog_frame.draw()
 
             # On Disconnect From PLC
-            if not self.connection_manager.is_connected() and (self.connection_status_display["text"] == "Connected"):
-                self.connection_status_display.configure(text="Disconnected")
+            if not self.connection_manager.is_connected() and \
+                    (self.footer.connection_status_display["text"] == "Connected"):
+                self.footer.connection_status_display.configure(text="Disconnected")
 
             # Update Axis Data
             for axis in self.motion.axis_list:
@@ -209,6 +136,3 @@ class UserInterface:
         self.root.update()
         self.root.destroy()
         exit()
-
-    def dummy_function(self):
-        return
