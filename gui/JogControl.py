@@ -6,7 +6,7 @@ from utility.ConnectionManagement import ConnectionManagement
 
 class JogControl:
     def __init__(
-            self, frame, axis, colors,
+            self, jog_frame, axis, colors,
             connection_manager: ConnectionManagement, application_settings: ApplicationSettings
     ):
         # Class Objects
@@ -14,10 +14,11 @@ class JogControl:
         self.application_settings = application_settings
 
         # Create Frame
-        self.frame = frame
+        self.jog_frame = jog_frame
         self.axis = axis
         self.colors = colors
-        self.subframe = Frame(self.frame)
+        self.subframe = Frame(self.jog_frame)
+        self.settings_frame = Frame(self.jog_frame)
 
         # Create Widgets
         self.jog_negative_button = Button(self.subframe)

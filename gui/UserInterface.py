@@ -69,12 +69,12 @@ class UserInterface:
             self.connection_manager.open_client(self.application_settings.settings["ControllerIP"])
 
         # Draw UI
-        self.header.draw_header()
-        self.menu_bar.create_menubar()
-        self.body.draw_body()
-        self.scan_frame.draw_scan_frame()
+        self.header.draw()
+        self.menu_bar.draw()
+        self.body.draw()
+        self.scan_frame.draw()
         self.jog_frame.draw()
-        self.footer.draw_footer()
+        self.footer.draw()
 
         # Start Update Loop
         self.stop_update = False

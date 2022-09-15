@@ -24,7 +24,7 @@ class Footer:
         # Footer Elements
         self.connection_status_display = None
 
-    def draw_footer(self):
+    def draw(self):
         self.footer.configure(bg=self.colors[2], height=20)
         self.footer.columnconfigure(100, weight=1)
         self.footer.grid(row=4, column=0, columnspan=2, sticky=S + E + W)

@@ -21,6 +21,6 @@ class Body:
         # Frame
         self.body = Frame(self.root)
 
-    def draw_body(self):
+    def draw(self):
         self.body.configure(bg=self.colors[0])
         self.body.grid(row=1, column=0, sticky=N + E + S + W)

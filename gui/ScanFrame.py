@@ -31,7 +31,7 @@ class ScanFrame:
             "P2P": P2P
         }
 
-    def draw_scan_frame(self):
+    def draw(self):
 
         self.scan_frame.configure(bg=self.colors[3])
         self.scan_frame.grid(row=1, column=1, rowspan=3, sticky=E + N + S)

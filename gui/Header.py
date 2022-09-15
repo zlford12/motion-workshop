@@ -21,7 +21,7 @@ class Header:
         # Frame
         self.header = Frame(self.root)
 
-    def draw_header(self):
+    def draw(self):
         button_x = 10
         button_y = 3
 
@@ -32,13 +32,13 @@ class Header:
         do_not_push_button = Button(self.header)
         do_not_push_button.configure(
             text="Do Not\nPush", width=button_x, height=button_y,
-            command=lambda: self.motion.commands.command(self.connection_manager.client, "RedefineAxes"),
+            command=lambda: self.motion.commands.command(self.connection_manager, "RedefineAxes"),
             bg=self.colors[3])
         do_not_push_button.grid(row=0, column=0, sticky=W, padx=10, pady=10)
 
         clear_error_button = Button(self.header)
         clear_error_button.configure(
             text="Reset", width=button_x, height=button_y, bg=self.colors[3],
-            command=lambda: self.motion.commands.command(self.connection_manager.client, "Reset")
+            command=lambda: self.motion.commands.command(self.connection_manager, "Reset")
         )
         clear_error_button.grid(row=0, column=100, sticky=E, padx=10, pady=10)

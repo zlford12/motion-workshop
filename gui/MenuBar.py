@@ -21,7 +21,7 @@ class MenuBar:
         # Frame
         self.menu_bar = Menu(self.root)
 
-    def create_menubar(self):
+    def draw(self):
         # File Menu
         file_menu = Menu(self.menu_bar, tearoff=0)
         file_menu.add_command(

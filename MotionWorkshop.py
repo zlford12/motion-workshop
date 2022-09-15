@@ -6,7 +6,7 @@ from utility.ApplicationSettings import ApplicationSettings
 
 
 def main():
-    # Start Update Thread
+    # Create Update Thread
     update_thread = threading.Thread(target=user_interface.update_loop, daemon=True)
 
     # Tkinter Main Loop
