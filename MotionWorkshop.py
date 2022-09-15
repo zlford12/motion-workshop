@@ -1,3 +1,4 @@
+import threading
 from gui.UserInterface import UserInterface
 from motion.Motion import Motion
 from utility.ConnectionManagement import ConnectionManagement
@@ -5,6 +6,10 @@ from utility.ApplicationSettings import ApplicationSettings
 
 
 def main():
+    # Start Update Thread
+    update_thread = threading.Thread(target=user_interface.update_loop, daemon=True)
+    update_thread.start()
+
     # Tkinter Main Loop
     user_interface.root.after(user_interface.update_loop_time, user_interface.startup)
     user_interface.root.mainloop()

@@ -1,3 +1,4 @@
+import time
 from tkinter import *
 from tkinter import messagebox, font
 from gui.ScanTypes import ScanTypes
@@ -164,9 +165,13 @@ class UserInterface:
         self.scan_controls.draw()
 
     def draw_jog_frame(self):
-        for child in self.jog_frame.winfo_children():
-            child.destroy()
+        # Configure Jog UI
+        self.jog_canvas.configure(
+            bg=self.colors[1], highlightthickness=0, xscrollcommand=self.jog_scroll.set
+        )
+        self.jog_frame.configure(bg=self.colors[1])
 
+        # Populate Jog Frame
         self.jog_controls = []
         row = 0
         column = 0
@@ -181,19 +186,18 @@ class UserInterface:
                 row = 0
                 column += 1
 
-        self.jog_scroll.configure(orient="horizontal", command=self.jog_canvas.xview)
-
-        self.jog_canvas.create_window(0, 0, anchor=NW, window=self.jog_frame)
-        self.jog_canvas.update_idletasks()
-        self.jog_canvas.configure(
-            bg=self.colors[1], scrollregion=self.jog_canvas.bbox("all"),
-            highlightthickness=0, xscrollcommand=self.jog_scroll.set
-        )
-        self.jog_frame.configure(bg=self.colors[1])
-
+        # Display Jog UI
         self.jog_canvas.grid(row=2, column=0, sticky=S + E + W)
-        self.jog_frame.grid(row=0, column=0)
+        self.jog_canvas.create_window(0, 0, anchor=W, window=self.jog_frame)
+        self.jog_scroll.configure(orient="horizontal", command=self.jog_canvas.xview)
         self.jog_scroll.grid(row=3, column=0, sticky=S + E + W)
+
+        # Update Canvas
+        self.jog_canvas.configure(scrollregion=self.jog_canvas.bbox("all"), height=self.jog_frame.winfo_height())
+        self.jog_canvas.bind("Configure", self.update_jog_canvas)
+
+    def update_jog_canvas(self):
+        self.jog_canvas.configure(scrollregion=self.jog_canvas.bbox("all"))
 
     def draw_footer(self):
 
@@ -214,47 +218,50 @@ class UserInterface:
         if self.application_settings.settings["ConnectAtStartup"] == "True":
             self.connection_manager.open_client(self.application_settings.settings["ControllerIP"])
 
-        # Loop
-        if not self.stop_update:
-            self.root.after(self.update_loop_time, self.update_loop)
-
     def update_loop(self):
-        # On Connect To PLC
-        if self.connection_manager.is_connected() and (self.connection_status_display["text"] == "Disconnected"):
-            # Get Data From PLC
-            self.motion.read_axes_from_system(self.connection_manager.client)
-            self.motion.machine_config.read_config_from_system(self.connection_manager.client)
-            self.motion.commands.populate_commands(self.connection_manager.client)
+        while not self.stop_update:
+            # On Connect To PLC
+            if self.connection_manager.is_connected() and (self.connection_status_display["text"] == "Disconnected"):
+                # Get Data From PLC
+                self.motion.read_axes_from_system(self.connection_manager.client)
+                self.motion.machine_config.read_config_from_system(self.connection_manager.client)
+                self.motion.commands.populate_commands(self.connection_manager.client)
 
-            # Update UI
-            self.connection_status_display.configure(text="Connected")
-            self.draw_jog_frame()
+                # Update UI
+                self.connection_status_display.configure(text="Connected")
+                self.draw_jog_frame()
 
-        # On Disconnect From PLC
-        if not self.connection_manager.is_connected() and (self.connection_status_display["text"] == "Connected"):
-            self.connection_status_display.configure(text="Disconnected")
+            # On Disconnect From PLC
+            if not self.connection_manager.is_connected() and (self.connection_status_display["text"] == "Connected"):
+                self.connection_status_display.configure(text="Disconnected")
 
-        # Check For Connection Management Error
-        if self.connection_manager.error:
-            self.connection_manager.error = False
-            messagebox.showerror(title="Connection Error", message=self.connection_manager.error_message)
+            # Update Axis Data
+            if self.connection_manager.is_connected():
+                for axis in self.motion.axis_list:
+                    axis.axis_data.update(self.connection_manager.client)
 
-        # Update Axis Data
-        if self.connection_manager.is_connected():
+            # Check For Connection Management Error
+            if self.connection_manager.error:
+                self.connection_manager.error = False
+                messagebox.showerror(title="Connection Error", message=self.connection_manager.error_message)
+
+            # Check For Axis Data Error
             for axis in self.motion.axis_list:
-                axis.axis_data.update(self.connection_manager.client)
+                if axis.axis_data.communication_error:
+                    axis.axis_data.communication_error = False
+                    messagebox.showerror(title="Connection Error", message=axis.axis_data.error_message)
 
-        # Update Jog Controls
-        for x in self.jog_controls:
-            x.update()
+            # Update Jog Controls
+            for x in self.jog_controls:
+                x.update()
 
-        # Loop
-        if not self.stop_update:
-            self.root.after(self.update_loop_time, self.update_loop)
+            # Wait
+            time.sleep(self.update_loop_time / 1000)
 
     def cleanup(self):
-        self.connection_manager.disconnect()
         self.stop_update = True
+        time.sleep(self.update_loop_time / 1000)
+        self.connection_manager.disconnect()
         self.root.update()
         self.root.destroy()
         exit()

@@ -20,30 +20,36 @@ class AxisData:
         self.Homing = False
         self.InPosition = False
         self.Stopping = False
+        self.communication_error = False
+        self.error_message = ""
 
     def update(self, client=Client("")):
-        self.Position = \
-            client.get_node(
-                "ns=2;s=Application.MNDT_Vars.arMNDTAxisData[" + str(self.AxisNo) + "].Position"
-            ).get_value()
-        self.Velocity = \
-            client.get_node(
-                "ns=2;s=Application.MNDT_Vars.arMNDTAxisData[" + str(self.AxisNo) + "].Velocity"
-            ).get_value()
-        self.Torque = \
-            client.get_node(
-                "ns=2;s=Application.MNDT_Vars.arMNDTAxisData[" + str(self.AxisNo) + "].Torque"
-            ).get_value()
-        status_bits = \
-            client.get_node(
-                "ns=2;s=Application.MNDT_Vars.arMNDTAxisData[" + str(self.AxisNo) + "].StatusBits"
-            ).get_value()
-        self.Error = status_bits & (1 << 0) != 0
-        self.Power = status_bits & (1 << 0) != 0
-        self.Standstill = status_bits & (1 << 0) != 0
-        self.InReference = status_bits & (1 << 0) != 0
-        self.Warning = status_bits & (1 << 0) != 0
-        self.ContinuousMotion = status_bits & (1 << 0) != 0
-        self.Homing = status_bits & (1 << 0) != 0
-        self.InPosition = status_bits & (1 << 0) != 0
-        self.Stopping = status_bits & (1 << 0) != 0
+        try:
+            self.Position = \
+                client.get_node(
+                    "ns=2;s=Application.MNDT_Vars.arMNDTAxisData[" + str(self.AxisNo) + "].Position"
+                ).get_value()
+            self.Velocity = \
+                client.get_node(
+                    "ns=2;s=Application.MNDT_Vars.arMNDTAxisData[" + str(self.AxisNo) + "].Velocity"
+                ).get_value()
+            self.Torque = \
+                client.get_node(
+                    "ns=2;s=Application.MNDT_Vars.arMNDTAxisData[" + str(self.AxisNo) + "].Torque"
+                ).get_value()
+            status_bits = \
+                client.get_node(
+                    "ns=2;s=Application.MNDT_Vars.arMNDTAxisData[" + str(self.AxisNo) + "].StatusBits"
+                ).get_value()
+            self.Error = status_bits & (1 << 0) != 0
+            self.Power = status_bits & (1 << 0) != 0
+            self.Standstill = status_bits & (1 << 0) != 0
+            self.InReference = status_bits & (1 << 0) != 0
+            self.Warning = status_bits & (1 << 0) != 0
+            self.ContinuousMotion = status_bits & (1 << 0) != 0
+            self.Homing = status_bits & (1 << 0) != 0
+            self.InPosition = status_bits & (1 << 0) != 0
+            self.Stopping = status_bits & (1 << 0) != 0
+        except Exception as e:
+            self.communication_error = True
+            self.error_message = e
