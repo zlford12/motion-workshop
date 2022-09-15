@@ -2,8 +2,9 @@ import threading
 import time
 from tkinter import *
 from tkinter import messagebox, font
-from gui.ScanTypes import ScanTypes
+from gui.Header import Header
 from gui.JogFrame import JogFrame
+from gui.ScanTypes import ScanTypes
 from motion.Motion import Motion
 from utility.ConnectionManagement import ConnectionManagement
 from utility.ApplicationSettings import ApplicationSettings
@@ -48,7 +49,7 @@ class UserInterface:
 
         # Window Elements
         self.menu_bar = Menu(self.root)
-        self.header = Frame(self.root)
+        self.header = Header(self.colors, self.root, connection_manager, application_settings, motion)
         self.body = Frame(self.root)
         self.jog_frame = JogFrame(self.colors, self.root, connection_manager, application_settings, motion)
         self.scan_frame = Frame(self.root)
@@ -107,35 +108,6 @@ class UserInterface:
         # Display Menubar
         self.root.configure(menu=self.menu_bar)
 
-    def draw_header(self):
-        button_x = 10
-        button_y = 3
-
-        self.header.configure(bg=self.colors[2])
-        self.header.grid(row=0, column=0, columnspan=2, sticky=N + E + W)
-        self.header.grid_columnconfigure(100, weight=1)
-
-        do_not_push_button = Button(self.header)
-        do_not_push_button.configure(
-            text="Do Not\nPush", width=button_x, height=button_y,
-            command=lambda: self.motion.commands.command(self.connection_manager.client, "RedefineAxes"),
-            bg=self.colors[3])
-        do_not_push_button.grid(row=0, column=0, sticky=W, padx=10, pady=10)
-
-        disconnect_button = Button(self.header)
-        disconnect_button.configure(
-            text="I Do\nNothing", width=button_x, height=button_y,
-            command=self.dummy_function,
-            bg=self.colors[3])
-        disconnect_button.grid(row=0, column=1, sticky=W, pady=10)
-
-        clear_error_button = Button(self.header)
-        clear_error_button.configure(
-            text="Reset", width=button_x, height=button_y, bg=self.colors[3],
-            command=lambda: self.motion.commands.command(self.connection_manager.client, "Reset")
-        )
-        clear_error_button.grid(row=0, column=100, sticky=E, padx=10, pady=10)
-
     def draw_body(self):
         self.body.configure(bg=self.colors[0])
         self.body.grid(row=1, column=0, sticky=N + E + S + W)
@@ -171,7 +143,7 @@ class UserInterface:
             self.connection_manager.open_client(self.application_settings.settings["ControllerIP"])
 
         # Draw UI
-        self.draw_header()
+        self.header.draw_header()
         self.create_menubar()
         self.draw_body()
         self.draw_scan_frame()
@@ -213,7 +185,7 @@ class UserInterface:
             for axis in self.motion.axis_list:
                 if axis.axis_data.communication_error:
                     axis.axis_data.communication_error = False
-                    messagebox.showerror(title="Connection Error", message=axis.axis_data.error_message)
+                    messagebox.showerror(title="Axis Data Error", message=axis.axis_data.error_message)
 
             # Update Jog Controls
             for x in self.jog_frame.jog_controls:
