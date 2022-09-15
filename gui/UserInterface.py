@@ -1,17 +1,17 @@
+import threading
 import time
 from tkinter import *
 from tkinter import messagebox, font
 from gui.ScanTypes import ScanTypes
-from gui.JogControl import JogControl
+from gui.JogFrame import JogFrame
 from motion.Motion import Motion
-from motion.Axis import Axis
 from utility.ConnectionManagement import ConnectionManagement
 from utility.ApplicationSettings import ApplicationSettings
 
 
 class UserInterface:
     def __init__(
-            self, connection_manager=ConnectionManagement(), application_settings=ApplicationSettings(), motion=Motion()
+            self, connection_manager: ConnectionManagement, application_settings: ApplicationSettings, motion: Motion
     ):
         # Class Objects
         self.connection_manager = connection_manager
@@ -50,36 +50,23 @@ class UserInterface:
         self.menu_bar = Menu(self.root)
         self.header = Frame(self.root)
         self.body = Frame(self.root)
+        self.jog_frame = JogFrame(self.colors, self.root, connection_manager, application_settings, motion)
         self.scan_frame = Frame(self.root)
-        self.jog_canvas = Canvas(self.root)
-        self.jog_scroll = Scrollbar(self.root)
         self.footer = Frame(self.root)
 
-        # Header Elements
-        self.HeaderElement = None
-
-        # Scan Frame
+        # Scan Frame Elements
         self.selected_scan_mode = None
         self.scan_types = ScanTypes()
         self.scan_controls = None
 
-        # Jog Frame Elements
-        self.jog_frame = Frame(self.jog_canvas)
-        self.jog_controls = [JogControl(self.jog_frame, Axis, self.colors)]
+        # Header Elements
+        self.HeaderElement = None
 
         # Footer Elements
         self.connection_status_display = None
 
-        # Draw UI
-        self.draw_header()
-        self.create_menubar()
-        self.draw_body()
-        self.draw_scan_frame()
-        self.draw_jog_frame()
-        self.draw_footer()
-
         # Update Loop
-        self.stop_update = False
+        self.stop_update = True
         self.update_loop_time = 200
 
     def create_menubar(self):
@@ -164,41 +151,6 @@ class UserInterface:
         self.scan_controls = self.scan_types.scan_types[self.selected_scan_mode](self.scan_frame, self.colors)
         self.scan_controls.draw()
 
-    def draw_jog_frame(self):
-        # Configure Jog UI
-        self.jog_canvas.configure(
-            bg=self.colors[1], highlightthickness=0, xscrollcommand=self.jog_scroll.set
-        )
-        self.jog_frame.configure(bg=self.colors[1])
-
-        # Populate Jog Frame
-        self.jog_controls = []
-        row = 0
-        column = 0
-        for i in range(len(self.motion.axis_list)):
-            self.jog_controls.append(JogControl(
-                self.jog_frame, self.motion.axis_list[i], self.colors,
-                self.connection_manager, self.application_settings
-            ))
-            self.jog_controls[i].draw(row, column)
-            row += 1
-            if row > int(self.application_settings.settings["JogControlHeight"]) - 1:
-                row = 0
-                column += 1
-
-        # Display Jog UI
-        self.jog_canvas.grid(row=2, column=0, sticky=S + E + W)
-        self.jog_canvas.create_window(0, 0, anchor=W, window=self.jog_frame)
-        self.jog_scroll.configure(orient="horizontal", command=self.jog_canvas.xview)
-        self.jog_scroll.grid(row=3, column=0, sticky=S + E + W)
-
-        # Update Canvas
-        self.jog_canvas.configure(scrollregion=self.jog_canvas.bbox("all"), height=self.jog_frame.winfo_height())
-        self.jog_canvas.bind("Configure", self.update_jog_canvas)
-
-    def update_jog_canvas(self):
-        self.jog_canvas.configure(scrollregion=self.jog_canvas.bbox("all"))
-
     def draw_footer(self):
 
         self.footer.configure(bg=self.colors[2], height=20)
@@ -213,10 +165,22 @@ class UserInterface:
         self.connection_status_display.configure(text="Disconnected", bg=self.colors[2], font=local_font)
         self.connection_status_display.grid(row=0, column=100, padx=10, sticky=E)
 
-    def startup(self):
+    def startup(self, loop_thread: threading.Thread):
         # Connect To OPCUA Server
         if self.application_settings.settings["ConnectAtStartup"] == "True":
             self.connection_manager.open_client(self.application_settings.settings["ControllerIP"])
+
+        # Draw UI
+        self.draw_header()
+        self.create_menubar()
+        self.draw_body()
+        self.draw_scan_frame()
+        self.jog_frame.draw()
+        self.draw_footer()
+
+        # Start Update Loop
+        self.stop_update = False
+        loop_thread.start()
 
     def update_loop(self):
         while not self.stop_update:
@@ -229,7 +193,7 @@ class UserInterface:
 
                 # Update UI
                 self.connection_status_display.configure(text="Connected")
-                self.draw_jog_frame()
+                self.jog_frame.draw()
 
             # On Disconnect From PLC
             if not self.connection_manager.is_connected() and (self.connection_status_display["text"] == "Connected"):
@@ -252,7 +216,7 @@ class UserInterface:
                     messagebox.showerror(title="Connection Error", message=axis.axis_data.error_message)
 
             # Update Jog Controls
-            for x in self.jog_controls:
+            for x in self.jog_frame.jog_controls:
                 x.update()
 
             # Wait

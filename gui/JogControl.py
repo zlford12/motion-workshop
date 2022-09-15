@@ -7,7 +7,7 @@ from utility.ConnectionManagement import ConnectionManagement
 class JogControl:
     def __init__(
             self, frame, axis, colors,
-            connection_manager=ConnectionManagement(), application_settings=ApplicationSettings()
+            connection_manager: ConnectionManagement, application_settings: ApplicationSettings
     ):
         # Class Objects
         self.connection_manager = connection_manager

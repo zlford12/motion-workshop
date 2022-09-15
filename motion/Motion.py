@@ -25,7 +25,7 @@ class Motion:
             axis.axis_data.Offset = axis_element.find("Offset").text == "True"
             self.axis_list.append(axis)
 
-    def read_axes_from_system(self, client=Client("")):
+    def read_axes_from_system(self, client: Client):
         self.axis_list = []
         number_of_axes = client.get_node("ns=2;s=Application.Custom_Vars.iNumberOfAxesToVar").get_value()
         for i in range(number_of_axes):
