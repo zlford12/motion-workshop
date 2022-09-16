@@ -37,6 +37,17 @@ class JogControl:
         self.settings_canvas = Canvas(self.subframe)
 
         # Create Settings Widgets
+        self.name_label = Label(self.subframe)
+        self.name_entry = Entry(self.subframe)
+        self.velocity_label = Label(self.subframe)
+        self.velocity_entry = Entry(self.subframe)
+        self.velocity_unit = Label(self.subframe)
+        self.acceleration_label = Label(self.subframe)
+        self.acceleration_entry = Entry(self.subframe)
+        self.acceleration_unit = Label(self.subframe)
+        self.deceleration_label = Label(self.subframe)
+        self.deceleration_entry = Entry(self.subframe)
+        self.deceleration_unit = Label(self.subframe)
 
     def configure_controls(self):
         # Unit
@@ -48,7 +59,9 @@ class JogControl:
         # Configure Frames
         self.subframe.configure(bg=self.colors[0], width=400, height=95)
         self.settings_canvas.configure(bg=self.colors[0], width=50, height=95, highlightthickness=0)
-        self.settings_canvas.create_text(25, 50, text="Settings", angle=90, fill=self.colors[5])
+        self.settings_canvas.create_text(
+            25, 50, text="Settings", angle=90, fill=self.colors[5], font=("Arial Black", 10)
+        )
         self.subframe.columnconfigure(2, weight=1)
         self.subframe.grid_propagate(False)
         self.settings_canvas.grid_propagate(False)
@@ -181,14 +194,12 @@ class JogControl:
 
     def configure_settings(self):
         # Unit
-        # if self.axis.axis_data.Rotary:
-        #     position_unit = "°"
-        #     velocity_unit = "RPM"
-        #     acceleration_unit = "rad/s^2"
-        # else:
-        #     position_unit = "mm"
-        #     velocity_unit = "mm/min"
-        #     acceleration_unit = "mm/s^2"
+        if self.axis.axis_data.Rotary:
+            velocity_unit = "RPM"
+            acceleration_unit = "rad/s^2"
+        else:
+            velocity_unit = "mm/min"
+            acceleration_unit = "mm/s^2"
 
         # Configure Frames
         self.subframe.configure(bg=self.colors[0], width=400, height=95)
@@ -198,7 +209,52 @@ class JogControl:
         self.subframe.grid_propagate(False)
         self.settings_canvas.grid_propagate(False)
 
+        # Widget Config Vars
+        entry_width = 8
+        entry_font = ("Arial Black", 8)
+        label_font = ("Arial", 10)
+
         # Configure Widgets
+        self.name_label.configure(
+            text="Name",
+            bg=self.colors[0], fg=self.colors[5], justify=RIGHT, font=label_font
+        )
+        self.name_entry.configure(
+            width=entry_width, bg=self.colors[3], font=entry_font
+        )
+        self.velocity_label.configure(
+            text="Velocity",
+            bg=self.colors[0], fg=self.colors[5], justify=RIGHT, font=label_font
+        )
+        self.velocity_entry.configure(
+            width=entry_width, bg=self.colors[3], font=entry_font
+        )
+        self.velocity_unit.configure(
+            text=velocity_unit,
+            bg=self.colors[0], fg=self.colors[5], justify=LEFT, font=label_font
+        )
+        self.acceleration_label.configure(
+            text="Acceleration",
+            bg=self.colors[0], fg=self.colors[5], justify=RIGHT, font=label_font
+        )
+        self.acceleration_entry.configure(
+            width=entry_width, bg=self.colors[3], font=entry_font
+        )
+        self.acceleration_unit.configure(
+            text=acceleration_unit,
+            bg=self.colors[0], fg=self.colors[5], justify=LEFT, font=label_font
+        )
+        self.deceleration_label.configure(
+            text="Deceleration",
+            bg=self.colors[0], fg=self.colors[5], justify=RIGHT, font=label_font
+        )
+        self.deceleration_entry.configure(
+            width=entry_width, bg=self.colors[3], font=entry_font
+        )
+        self.deceleration_unit.configure(
+            text=acceleration_unit,
+            bg=self.colors[0], fg=self.colors[5], justify=LEFT, font=label_font
+        )
 
         # Bind Widgets
         self.settings_canvas.bind(
@@ -234,9 +290,24 @@ class JogControl:
         else:
             pad_b = 5
         self.subframe.grid(row=self.row, column=self.column, padx=(pad_l, pad_r), pady=(pad_t, pad_b))
-        self.settings_canvas.grid(row=0, column=6, rowspan=2)
-
+        self.settings_canvas.grid(row=0, column=6, rowspan=4)
+        
+        # Grid Config Vars
+        x = 1
+        y = 1
+        
         # Draw Widgets
+        self.name_label.grid(row=0, column=0, columnspan=2, padx=x, pady=(y, 0))
+        self.name_entry.grid(row=1, column=0, padx=x, pady=y)
+        self.velocity_label.grid(row=2, column=0, columnspan=2, padx=x, pady=(y, 0))
+        self.velocity_entry.grid(row=3, column=0, padx=x, pady=y)
+        self.velocity_unit.grid(row=3, column=1, padx=x, pady=y, sticky=W)
+        self.acceleration_label.grid(row=0, column=2, columnspan=2, padx=x, pady=(y, 0))
+        self.acceleration_entry.grid(row=1, column=2, padx=x, pady=y)
+        self.acceleration_unit.grid(row=1, column=3, padx=x, pady=y, sticky=W)
+        self.deceleration_label.grid(row=2, column=2, columnspan=2, padx=x, pady=(y, 0))
+        self.deceleration_entry.grid(row=3, column=2, padx=x, pady=y)
+        self.deceleration_unit.grid(row=3, column=3, padx=x, pady=y, sticky=W)
 
     def jog_positive(self, button_state, half_speed):
         if self.connection_manager.is_connected():

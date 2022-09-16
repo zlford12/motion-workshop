@@ -95,13 +95,13 @@ class UserInterface:
                 self.motion.commands.populate_commands(self.connection_manager.client)
 
                 # Update UI
-                self.footer.connection_status_display.configure_controls(text="Connected")
+                self.footer.connection_status_display.configure(text="Connected")
                 self.jog_frame.draw()
 
             # On Disconnect From PLC
             if not self.connection_manager.is_connected() and \
                     (self.footer.connection_status_display["text"] == "Connected"):
-                self.footer.connection_status_display.configure_controls(text="Disconnected")
+                self.footer.connection_status_display.configure(text="Disconnected")
 
             # Update Axis Data
             for axis in self.motion.axis_list:
