@@ -7,3 +7,6 @@ class AxisLimits:
         self.MaxVelocity = 0
         self.MaxAcceleration = 0
         self.MaxDeceleration = 0
+        self.SetVelocity = 0
+        self.SetAcceleration = 0
+        self.SetDeceleration = 0

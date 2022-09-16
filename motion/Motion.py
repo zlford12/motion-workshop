@@ -11,6 +11,8 @@ class Motion:
         self.axis_list = [Axis()]
         self.machine_config = MachineConfig(self.axis_file)
         self.commands = Commands()
+        self.communication_error = False
+        self.error_message = ""
 
         self.read_axes_from_file()
 
@@ -51,3 +53,43 @@ class Motion:
                     "ns=2;s=Application.MNDT_Vars.arMNDTAxisData[" + str(axis.axis_data.AxisNo) + "].OffsetAxis"
                 ).get_value()
             self.axis_list.append(axis)
+
+    def update(self, client: Client):
+        for axis in self.axis_list:
+            try:
+                # Axis Data
+                axis.axis_data.Position = \
+                    client.get_node(
+                        "ns=2;s=Application.MNDT_Vars.arMNDTAxisData[" + str(axis.axis_data.AxisNo) + "].Position"
+                    ).get_value()
+                axis.axis_data.Velocity = \
+                    client.get_node(
+                        "ns=2;s=Application.MNDT_Vars.arMNDTAxisData[" + str(axis.axis_data.AxisNo) + "].Velocity"
+                    ).get_value()
+                axis.axis_data.Torque = \
+                    client.get_node(
+                        "ns=2;s=Application.MNDT_Vars.arMNDTAxisData[" + str(axis.axis_data.AxisNo) + "].Torque"
+                    ).get_value()
+                status_bits = \
+                    client.get_node(
+                        "ns=2;s=Application.MNDT_Vars.arMNDTAxisData[" + str(axis.axis_data.AxisNo) + "].StatusBits"
+                    ).get_value()
+                axis.axis_data.Error = status_bits & (1 << 0) != 0
+                axis.axis_data.Power = status_bits & (1 << 0) != 0
+                axis.axis_data.Standstill = status_bits & (1 << 0) != 0
+                axis.axis_data.InReference = status_bits & (1 << 0) != 0
+                axis.axis_data.Warning = status_bits & (1 << 0) != 0
+                axis.axis_data.ContinuousMotion = status_bits & (1 << 0) != 0
+                axis.axis_data.Homing = status_bits & (1 << 0) != 0
+                axis.axis_data.InPosition = status_bits & (1 << 0) != 0
+                axis.axis_data.Stopping = status_bits & (1 << 0) != 0
+
+                # Axis Limits
+                axis.axis_limits.MinPosition = \
+                    client.get_node(
+                        "ns=2;s=Application.PersistentVars.arMNDTAxisLimits[" +
+                        str(axis.axis_data.AxisNo) + "].MinPosition"
+                    )
+            except Exception as e:
+                self.communication_error = True
+                self.error_message = e

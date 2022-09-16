@@ -1,6 +1,7 @@
 from tkinter import *
 from opcua import ua
 from motion.Motion import Motion
+from motion.Axis import Axis
 from utility.ApplicationSettings import ApplicationSettings
 from utility.ConnectionManagement import ConnectionManagement
 
@@ -8,7 +9,7 @@ from utility.ConnectionManagement import ConnectionManagement
 # noinspection PyArgumentList
 class JogControl:
     def __init__(
-            self, jog_frame, axis, colors,
+            self, jog_frame, axis: Axis, colors,
             connection_manager: ConnectionManagement, application_settings: ApplicationSettings, motion: Motion
     ):
         # Class Objects
@@ -63,6 +64,7 @@ class JogControl:
             25, 50, text="Settings", angle=90, fill=self.colors[5], font=("Arial Black", 10)
         )
         self.subframe.columnconfigure(2, weight=1)
+        self.subframe.columnconfigure(3, weight=0)
         self.subframe.grid_propagate(False)
         self.settings_canvas.grid_propagate(False)
 
@@ -205,7 +207,8 @@ class JogControl:
         self.subframe.configure(bg=self.colors[0], width=400, height=95)
         self.settings_canvas.configure(bg=self.colors[0], width=50, height=95, highlightthickness=0)
         self.settings_canvas.create_text(25, 600, text="Exit", angle=90, fill=self.colors[5])
-        self.subframe.columnconfigure(2, weight=1)
+        self.subframe.columnconfigure(2, weight=0)
+        self.subframe.columnconfigure(3, weight=1)
         self.subframe.grid_propagate(False)
         self.settings_canvas.grid_propagate(False)
 
@@ -293,21 +296,24 @@ class JogControl:
         self.settings_canvas.grid(row=0, column=6, rowspan=4)
         
         # Grid Config Vars
-        x = 1
+        x = 5
         y = 1
         
         # Draw Widgets
-        self.name_label.grid(row=0, column=0, columnspan=2, padx=x, pady=(y, 0))
-        self.name_entry.grid(row=1, column=0, padx=x, pady=y)
-        self.velocity_label.grid(row=2, column=0, columnspan=2, padx=x, pady=(y, 0))
-        self.velocity_entry.grid(row=3, column=0, padx=x, pady=y)
+        self.name_label.grid(row=0, column=0, columnspan=2, padx=x, pady=(y, 0), sticky=W)
+        self.name_entry.grid(row=1, column=0, padx=x, pady=y, sticky=W)
+        self.velocity_label.grid(row=2, column=0, columnspan=2, padx=x, pady=(y, 0), sticky=W)
+        self.velocity_entry.grid(row=3, column=0, padx=x, pady=y, sticky=W)
         self.velocity_unit.grid(row=3, column=1, padx=x, pady=y, sticky=W)
-        self.acceleration_label.grid(row=0, column=2, columnspan=2, padx=x, pady=(y, 0))
-        self.acceleration_entry.grid(row=1, column=2, padx=x, pady=y)
+        self.acceleration_label.grid(row=0, column=2, columnspan=2, padx=x, pady=(y, 0), sticky=W)
+        self.acceleration_entry.grid(row=1, column=2, padx=x, pady=y, sticky=W)
         self.acceleration_unit.grid(row=1, column=3, padx=x, pady=y, sticky=W)
-        self.deceleration_label.grid(row=2, column=2, columnspan=2, padx=x, pady=(y, 0))
-        self.deceleration_entry.grid(row=3, column=2, padx=x, pady=y)
+        self.deceleration_label.grid(row=2, column=2, columnspan=2, padx=x, pady=(y, 0), sticky=W)
+        self.deceleration_entry.grid(row=3, column=2, padx=x, pady=y, sticky=W)
         self.deceleration_unit.grid(row=3, column=3, padx=x, pady=y, sticky=W)
+
+        # Populate Entry Widgets
+        self.name_entry.insert(0, self.axis.axis_data.Name)
 
     def jog_positive(self, button_state, half_speed):
         if self.connection_manager.is_connected():

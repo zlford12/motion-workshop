@@ -104,9 +104,7 @@ class UserInterface:
                 self.footer.connection_status_display.configure(text="Disconnected")
 
             # Update Axis Data
-            for axis in self.motion.axis_list:
-                if self.connection_manager.is_connected():
-                    axis.axis_data.update(self.connection_manager.client)
+            self.motion.update(self.connection_manager.client)
 
             # Check For Connection Management Error
             if self.connection_manager.error:
@@ -114,11 +112,10 @@ class UserInterface:
                 messagebox.showerror(title="Connection Error", message=self.connection_manager.error_message)
 
             # Check For Axis Data Error
-            for axis in self.motion.axis_list:
-                if axis.axis_data.communication_error:
-                    axis.axis_data.communication_error = False
-                    if self.connection_manager.connection_desired:
-                        messagebox.showerror(title="Connection Error", message="Failed To Get Axis Data")
+            if self.motion.communication_error:
+                self.motion.communication_error = False
+                if self.connection_manager.connection_desired:
+                    messagebox.showerror(title="Connection Error", message="Failed To Get Axis Data")
 
             # Update Jog Controls
             for x in self.jog_frame.jog_controls:
