@@ -95,28 +95,28 @@ class JogControl:
 
         # Bind Widgets
         self.jog_negative_button.bind(
-            "<ButtonPress>", lambda state: self.jog_negative(True, False)
+            "<ButtonPress>", lambda state: self.jog_negative(True, 0)
         )
         self.jog_negative_button.bind(
-            "<ButtonRelease>", lambda state: self.jog_negative(False, False)
+            "<ButtonRelease>", lambda state: self.jog_negative(False, 0)
         )
         self.jog_negative_slow_button.bind(
-            "<ButtonPress>", lambda state: self.jog_negative(True, True)
+            "<ButtonPress>", lambda state: self.jog_negative(True, 1)
         )
         self.jog_negative_slow_button.bind(
-            "<ButtonRelease>", lambda state: self.jog_negative(False, True)
+            "<ButtonRelease>", lambda state: self.jog_negative(False, 1)
         )
         self.jog_positive_button.bind(
-            "<ButtonPress>", lambda state: self.jog_positive(True, False)
+            "<ButtonPress>", lambda state: self.jog_positive(True, 0)
         )
         self.jog_positive_button.bind(
-            "<ButtonRelease>", lambda state: self.jog_positive(False, False)
+            "<ButtonRelease>", lambda state: self.jog_positive(False, 0)
         )
         self.jog_positive_slow_button.bind(
-            "<ButtonPress>", lambda state: self.jog_positive(True, True)
+            "<ButtonPress>", lambda state: self.jog_positive(True, 1)
         )
         self.jog_positive_slow_button.bind(
-            "<ButtonRelease>", lambda state: self.jog_positive(False, True)
+            "<ButtonRelease>", lambda state: self.jog_positive(False, 1)
         )
         self.settings_canvas.bind(
             "<Enter>", lambda state: self.recolor_settings(True)
@@ -213,7 +213,7 @@ class JogControl:
         self.settings_canvas.grid_propagate(False)
 
         # Widget Config Vars
-        entry_width = 8
+        entry_width = 10
         entry_font = ("Arial Black", 8)
         label_font = ("Arial", 10)
 
@@ -267,7 +267,7 @@ class JogControl:
             "<Leave>", lambda state: self.recolor_settings(False)
         )
         self.settings_canvas.bind(
-            "<ButtonPress>", lambda coordinates: self.draw_controls(self.row, self.column)
+            "<ButtonPress>", lambda instance: self.apply_settings()
         )
 
     def draw_settings(self):
@@ -313,26 +313,33 @@ class JogControl:
         self.deceleration_unit.grid(row=3, column=3, padx=x, pady=y, sticky=W)
 
         # Populate Entry Widgets
+        self.name_entry.delete(0, 'end')
         self.name_entry.insert(0, self.axis.axis_data.Name)
+        self.velocity_entry.delete(0, 'end')
+        self.velocity_entry.insert(0, self.axis.axis_limits.SetVelocity)
+        self.acceleration_entry.delete(0, 'end')
+        self.acceleration_entry.insert(0, self.axis.axis_limits.SetAcceleration)
+        self.deceleration_entry.delete(0, 'end')
+        self.deceleration_entry.insert(0, self.axis.axis_limits.SetDeceleration)
 
-    def jog_positive(self, button_state, half_speed):
+    def jog_positive(self, button_state, speed: int):
         if self.connection_manager.is_connected():
             client = self.connection_manager.client
             i = self.axis.axis_data.AxisNo
             client.get_node(
-                "ns=2;s=Application.MNDT_Vars.arHalfSpeed[" + str(i) + "]"
-            ).set_value(half_speed)
+                "ns=2;s=Application.MNDT_Vars.iJogMultiplierIndex"
+            ).set_value(speed, varianttype=ua.VariantType.Int16)
             client.get_node(
                 "ns=2;s=Application.MNDT_Vars.arJogPositive[" + str(i) + "]"
             ).set_value(button_state)
 
-    def jog_negative(self, button_state, half_speed):
+    def jog_negative(self, button_state, speed: int):
         if self.connection_manager.is_connected():
             client = self.connection_manager.client
             i = self.axis.axis_data.AxisNo
             client.get_node(
-                "ns=2;s=Application.MNDT_Vars.arHalfSpeed[" + str(i) + "]"
-            ).set_value(half_speed)
+                "ns=2;s=Application.MNDT_Vars.iJogMultiplierIndex"
+            ).set_value(speed, varianttype=ua.VariantType.Int16)
             client.get_node(
                 "ns=2;s=Application.MNDT_Vars.arJogNegative[" + str(i) + "]"
             ).set_value(button_state)
@@ -342,8 +349,8 @@ class JogControl:
             client = self.connection_manager.client
             i = self.axis.axis_data.AxisNo
             client.get_node(
-                "ns=2;s=Application.MNDT_Vars.arHalfSpeed[" + str(i) + "]"
-            ).set_value(False)
+                "ns=2;s=Application.MNDT_Vars.iJogMultiplierIndex"
+            ).set_value(0, varianttype=ua.VariantType.Int16)
             client.get_node(
                 "ns=2;s=Application.MNDT_Vars.arGoToPosition[" + str(i) + "]"
             ).set_value(float(self.go_to_entry.get()), ua.VariantType.Float)
@@ -356,3 +363,55 @@ class JogControl:
             self.settings_canvas.configure(bg=self.colors[6])
         else:
             self.settings_canvas.configure(bg=self.colors[0])
+
+    def apply_settings(self):
+        if self.connection_manager.is_connected():
+            # Update Name
+            if self.name_entry.get() != self.axis.axis_data.Name and self.name_entry.get() != "":
+                name_input = self.name_entry.get()
+                name_bytes = []
+                values = []
+                for b in range(64):
+                    if b < len(name_input):
+                        name_bytes.append(name_input[b])
+                    else:
+                        name_bytes.append("")
+
+                    if ((b + 1) % 8) == 0:
+                        word = ""
+                        for c in range(8):
+                            word = word + name_bytes[b - c]
+                        values.append(word[::-1].encode("ascii"))
+
+                for i in range(len(values)):
+                    self.connection_manager.client.get_node(
+                        "ns=2;s=Application.MNDT_Vars.arValues[" + str(i + 1) + "]"
+                    ).set_value(int.from_bytes(values[i], 'little'), varianttype=ua.VariantType.UInt64)
+
+                self.connection_manager.client.get_node(
+                    "ns=2;s=Application.MNDT_Vars.arValues[0]"
+                ).set_value(self.axis.axis_data.AxisNo, varianttype=ua.VariantType.UInt64)
+
+                self.motion.commands.command(self.connection_manager, "RenameAxis")
+
+                self.motion.commands.command(self.connection_manager, "ReloadAxisInfo")
+
+                self.motion.update(self.connection_manager.client)
+
+            # Update Velocity
+            if self.velocity_entry.get() != str(self.axis.axis_limits.SetVelocity) \
+                    and self.velocity_entry.get() != "":
+                print("Velocity Changed")
+
+            # Update Acceleration
+            if self.acceleration_entry.get() != str(self.axis.axis_limits.SetAcceleration) \
+                    and self.acceleration_entry.get() != "":
+                print("Acceleration Changed")
+
+            # Update Deceleration
+            if self.deceleration_entry.get() != str(self.axis.axis_limits.SetDeceleration) \
+                    and self.deceleration_entry.get() != "":
+                print("Deceleration Changed")
+
+        # Draw Controls
+        self.draw_controls(self.row, self.column)

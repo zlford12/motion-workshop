@@ -32,7 +32,7 @@ class Header:
         do_not_push_button = Button(self.header)
         do_not_push_button.configure(
             text="Do Not\nPush", width=button_x, height=button_y,
-            command=lambda: self.motion.commands.command(self.connection_manager, "RedefineAxes"),
+            command=lambda: self.motion.commands.command(self.connection_manager, "ReloadAxisInfo"),
             bg=self.colors[3])
         do_not_push_button.grid(row=0, column=0, sticky=W, padx=10, pady=10)
 

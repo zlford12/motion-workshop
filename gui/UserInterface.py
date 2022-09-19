@@ -115,7 +115,9 @@ class UserInterface:
             if self.motion.communication_error:
                 self.motion.communication_error = False
                 if self.connection_manager.connection_desired:
-                    messagebox.showerror(title="Connection Error", message="Failed To Get Axis Data")
+                    messagebox.showerror(title="Connection Error", message="Failed To Get Axis Data\nDisconnecting...")
+
+                    self.connection_manager.disconnect()
 
             # Update Jog Controls
             for x in self.jog_frame.jog_controls:

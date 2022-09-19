@@ -58,6 +58,22 @@ class Motion:
         for axis in self.axis_list:
             try:
                 # Axis Data
+                axis.axis_data.Name = \
+                    client.get_node(
+                        "ns=2;s=Application.MNDT_Vars.arMNDTAxisData[" + str(axis.axis_data.AxisNo) + "].Name"
+                    ).get_value()
+                axis.axis_data.Rotary = \
+                    client.get_node(
+                        "ns=2;s=Application.MNDT_Vars.arMNDTAxisData[" + str(axis.axis_data.AxisNo) + "].Rotary"
+                    ).get_value()
+                axis.axis_data.Linkable = \
+                    client.get_node(
+                        "ns=2;s=Application.MNDT_Vars.arMNDTAxisData[" + str(axis.axis_data.AxisNo) + "].LinkableAxis"
+                    ).get_value()
+                axis.axis_data.Offset = \
+                    client.get_node(
+                        "ns=2;s=Application.MNDT_Vars.arMNDTAxisData[" + str(axis.axis_data.AxisNo) + "].OffsetAxis"
+                    ).get_value()
                 axis.axis_data.Position = \
                     client.get_node(
                         "ns=2;s=Application.MNDT_Vars.arMNDTAxisData[" + str(axis.axis_data.AxisNo) + "].Position"
@@ -89,7 +105,52 @@ class Motion:
                     client.get_node(
                         "ns=2;s=Application.PersistentVars.arMNDTAxisLimits[" +
                         str(axis.axis_data.AxisNo) + "].MinPosition"
-                    )
+                    ).get_value()
+                axis.axis_limits.MaxPosition = \
+                    client.get_node(
+                        "ns=2;s=Application.PersistentVars.arMNDTAxisLimits[" +
+                        str(axis.axis_data.AxisNo) + "].MaxPosition"
+                    ).get_value()
+                axis.axis_limits.MinCrashPosition = \
+                    client.get_node(
+                        "ns=2;s=Application.PersistentVars.arMNDTAxisLimits[" +
+                        str(axis.axis_data.AxisNo) + "].MinCrashPosition"
+                    ).get_value()
+                axis.axis_limits.MaxCrashPosition = \
+                    client.get_node(
+                        "ns=2;s=Application.PersistentVars.arMNDTAxisLimits[" +
+                        str(axis.axis_data.AxisNo) + "].MaxCrashPosition"
+                    ).get_value()
+                axis.axis_limits.MaxVelocity = \
+                    client.get_node(
+                        "ns=2;s=Application.PersistentVars.arMNDTAxisLimits[" +
+                        str(axis.axis_data.AxisNo) + "].MaxVelocity"
+                    ).get_value()
+                axis.axis_limits.MaxAcceleration = \
+                    client.get_node(
+                        "ns=2;s=Application.PersistentVars.arMNDTAxisLimits[" +
+                        str(axis.axis_data.AxisNo) + "].MaxAcceleration"
+                    ).get_value()
+                axis.axis_limits.MaxDeceleration = \
+                    client.get_node(
+                        "ns=2;s=Application.PersistentVars.arMNDTAxisLimits[" +
+                        str(axis.axis_data.AxisNo) + "].MaxDeceleration"
+                    ).get_value()
+                axis.axis_limits.SetVelocity = \
+                    client.get_node(
+                        "ns=2;s=Application.PersistentVars.arMNDTAxisLimits[" +
+                        str(axis.axis_data.AxisNo) + "].SetVelocity"
+                    ).get_value()
+                axis.axis_limits.SetAcceleration = \
+                    client.get_node(
+                        "ns=2;s=Application.PersistentVars.arMNDTAxisLimits[" +
+                        str(axis.axis_data.AxisNo) + "].SetAcceleration"
+                    ).get_value()
+                axis.axis_limits.SetDeceleration = \
+                    client.get_node(
+                        "ns=2;s=Application.PersistentVars.arMNDTAxisLimits[" +
+                        str(axis.axis_data.AxisNo) + "].SetDeceleration"
+                    ).get_value()
             except Exception as e:
                 self.communication_error = True
                 self.error_message = e
