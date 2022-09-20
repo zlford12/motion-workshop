@@ -398,20 +398,50 @@ class JogControl:
 
                 self.motion.update(self.connection_manager.client)
 
-            # Update Velocity
-            if self.velocity_entry.get() != str(self.axis.axis_limits.SetVelocity) \
-                    and self.velocity_entry.get() != "":
-                print("Velocity Changed")
+            # Update Set Limit Values
+            if self.velocity_entry.get() != str(self.axis.axis_limits.SetVelocity) or \
+                    self.acceleration_entry.get() != str(self.axis.axis_limits.SetAcceleration) or \
+                    self.deceleration_entry.get() != str(self.axis.axis_limits.SetDeceleration):
 
-            # Update Acceleration
-            if self.acceleration_entry.get() != str(self.axis.axis_limits.SetAcceleration) \
-                    and self.acceleration_entry.get() != "":
-                print("Acceleration Changed")
+                if self.velocity_entry.get() == "":
+                    velocity_input = round(self.axis.axis_limits.SetVelocity * 1000000)
+                else:
+                    velocity_input = round(min(float(self.velocity_entry.get()),
+                                               self.axis.axis_limits.MaxVelocity) * 1000000)
 
-            # Update Deceleration
-            if self.deceleration_entry.get() != str(self.axis.axis_limits.SetDeceleration) \
-                    and self.deceleration_entry.get() != "":
-                print("Deceleration Changed")
+                if self.acceleration_entry.get() == "":
+                    acceleration_input = round(self.axis.axis_limits.SetAcceleration * 1000000)
+                else:
+                    acceleration_input = round(min(float(self.acceleration_entry.get()),
+                                                   self.axis.axis_limits.MaxAcceleration) * 1000000)
+
+                if self.deceleration_entry.get() == "":
+                    deceleration_input = round(self.axis.axis_limits.SetDeceleration * 1000000)
+                else:
+                    deceleration_input = round(min(float(self.deceleration_entry.get()),
+                                                   self.axis.axis_limits.MaxDeceleration) * 1000000)
+
+                self.connection_manager.client.get_node(
+                    "ns=2;s=Application.MNDT_Vars.arValues[0]"
+                ).set_value(self.axis.axis_data.AxisNo, varianttype=ua.VariantType.UInt64)
+
+                self.connection_manager.client.get_node(
+                    "ns=2;s=Application.MNDT_Vars.arValues[1]"
+                ).set_value(velocity_input, varianttype=ua.VariantType.UInt64)
+
+                self.connection_manager.client.get_node(
+                    "ns=2;s=Application.MNDT_Vars.arValues[2]"
+                ).set_value(acceleration_input, varianttype=ua.VariantType.UInt64)
+
+                self.connection_manager.client.get_node(
+                    "ns=2;s=Application.MNDT_Vars.arValues[3]"
+                ).set_value(deceleration_input, varianttype=ua.VariantType.UInt64)
+
+                self.motion.commands.command(self.connection_manager, "SetAxisLimits")
+
+                self.motion.commands.command(self.connection_manager, "ReloadAxisInfo")
+
+                self.motion.update(self.connection_manager.client)
 
         # Draw Controls
         self.draw_controls(self.row, self.column)
