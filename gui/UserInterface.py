@@ -93,6 +93,7 @@ class UserInterface:
                 self.motion.read_axes_from_system(self.connection_manager.client)
                 self.motion.machine_config.read_config_from_system(self.connection_manager.client)
                 self.motion.commands.populate_commands(self.connection_manager.client)
+                self.body.create_status_labels()
 
                 # Update UI
                 self.footer.connection_status_display.configure(text="Connected")
@@ -105,6 +106,10 @@ class UserInterface:
 
             # Update Axis Data
             self.motion.update(self.connection_manager.client)
+
+            # Update Status Labels
+            if self.connection_manager.is_connected():
+                self.body.update_status_labels()
 
             # Check For Connection Management Error
             if self.connection_manager.error:
