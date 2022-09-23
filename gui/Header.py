@@ -25,6 +25,9 @@ class Header:
         button_x = 10
         button_y = 3
 
+        for child in self.header.winfo_children():
+            child.destroy()
+
         self.header.configure(bg=self.colors[2])
         self.header.grid(row=0, column=0, columnspan=2, sticky=N + E + W)
         self.header.grid_columnconfigure(100, weight=1)
@@ -42,3 +45,18 @@ class Header:
             command=lambda: self.motion.commands.command(self.connection_manager, "Reset")
         )
         clear_error_button.grid(row=0, column=100, sticky=E, padx=10, pady=10)
+
+        if self.motion.link_status:
+            link_button = Button(self.header)
+            link_button.configure(
+                text="Unlink", width=button_x, height=button_y, bg=self.colors[3],
+                command=lambda: self.motion.commands.command(self.connection_manager, "Unlink")
+            )
+            link_button.grid(row=0, column=1, sticky=W, padx=10, pady=10)
+        else:
+            link_button = Button(self.header)
+            link_button.configure(
+                text="Link", width=button_x, height=button_y, bg=self.colors[3],
+                command=lambda: self.motion.commands.command(self.connection_manager, "Link")
+            )
+            link_button.grid(row=0, column=1, sticky=W, padx=10, pady=10)

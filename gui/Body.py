@@ -49,7 +49,6 @@ class Body:
             )
             label.grid(row=axis_number, column=0, sticky=W)
             self.axis_status.append((label, axis_number))
-            print(label, axis_number)
 
     def update_status_labels(self):
         try:

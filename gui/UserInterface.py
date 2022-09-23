@@ -61,7 +61,7 @@ class UserInterface:
 
         # Update Loop
         self.stop_update = True
-        self.update_loop_wait_time = 200
+        self.update_loop_wait_time = 1
         self.last_update_loop_time = None
 
     def startup(self, loop_thread: threading.Thread):
@@ -82,6 +82,7 @@ class UserInterface:
         loop_thread.start()
 
     def update_loop(self):
+        link_status_cache = False
         while not self.stop_update:
             # Measure Start Time
             start_time = time.time()
@@ -93,10 +94,12 @@ class UserInterface:
                 self.motion.read_axes_from_system(self.connection_manager.client)
                 self.motion.machine_config.read_config_from_system(self.connection_manager.client)
                 self.motion.commands.populate_commands(self.connection_manager.client)
+                self.motion.outputs.populate_outputs(self.connection_manager.client)
                 self.body.create_status_labels()
 
                 # Update UI
                 self.footer.connection_status_display.configure(text="Connected")
+                self.header.draw()
                 self.jog_frame.draw()
 
             # On Disconnect From PLC
@@ -111,6 +114,14 @@ class UserInterface:
             if self.connection_manager.is_connected():
                 self.body.update_status_labels()
 
+            # Update Jog Controls
+            for x in self.jog_frame.jog_controls:
+                x.update()
+            if link_status_cache != self.motion.link_status:
+                self.jog_frame.draw()
+                self.header.draw()
+                link_status_cache = self.motion.link_status
+
             # Check For Connection Management Error
             if self.connection_manager.error:
                 self.connection_manager.error = False
@@ -123,10 +134,6 @@ class UserInterface:
                     messagebox.showerror(title="Connection Error", message="Failed To Get Axis Data\nDisconnecting...")
 
                     self.connection_manager.disconnect()
-
-            # Update Jog Controls
-            for x in self.jog_frame.jog_controls:
-                x.update()
 
             # Wait
             time.sleep(self.update_loop_wait_time / 1000)

@@ -1,6 +1,7 @@
 from motion.Axis import Axis
 from motion.MachineConfig import MachineConfig
 from motion.Commands import Commands
+from motion.Outputs import Outputs
 from opcua import Client
 import xml.etree.ElementTree
 
@@ -11,8 +12,11 @@ class Motion:
         self.axis_list = [Axis()]
         self.machine_config = MachineConfig(self.axis_file)
         self.commands = Commands()
+        self.outputs = Outputs()
         self.communication_error = False
         self.error_message = ""
+
+        self.link_status = False
 
         self.read_axes_from_file()
 
@@ -154,3 +158,11 @@ class Motion:
             except Exception as e:
                 self.communication_error = True
                 self.error_message = e
+
+        try:
+            self.link_status = client.get_node(
+                "ns=2;s=Application.MNDT_Vars.arOutputs[" + str(self.outputs.output_list["Linked"]) + "]"
+            ).get_value()
+        except Exception as e:
+            self.communication_error = True
+            self.error_message = e
