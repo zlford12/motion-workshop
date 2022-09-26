@@ -29,23 +29,10 @@ class Header:
             child.destroy()
 
         self.header.configure(bg=self.colors[2])
-        self.header.grid(row=0, column=0, columnspan=2, sticky=N + E + W)
+        self.header.grid(row=0, column=0, columnspan=3, sticky=N + E + W)
         self.header.grid_columnconfigure(100, weight=1)
 
-        do_not_push_button = Button(self.header)
-        do_not_push_button.configure(
-            text="Do Not\nPush", width=button_x, height=button_y,
-            command=lambda: self.motion.commands.command(self.connection_manager, "ReloadAxisInfo"),
-            bg=self.colors[3])
-        do_not_push_button.grid(row=0, column=0, sticky=W, padx=10, pady=10)
-
-        clear_error_button = Button(self.header)
-        clear_error_button.configure(
-            text="Reset", width=button_x, height=button_y, bg=self.colors[3],
-            command=lambda: self.motion.commands.command(self.connection_manager, "Reset")
-        )
-        clear_error_button.grid(row=0, column=100, sticky=E, padx=10, pady=10)
-
+        # Link Unlink Button
         if self.motion.link_status:
             link_button = Button(self.header)
             link_button.configure(
@@ -60,3 +47,11 @@ class Header:
                 command=lambda: self.motion.commands.command(self.connection_manager, "Link")
             )
             link_button.grid(row=0, column=1, sticky=W, padx=10, pady=10)
+
+        # Reset Button
+        clear_error_button = Button(self.header)
+        clear_error_button.configure(
+            text="Reset", width=button_x, height=button_y, bg=self.colors[3],
+            command=lambda: self.motion.commands.command(self.connection_manager, "Reset")
+        )
+        clear_error_button.grid(row=0, column=100, sticky=E, padx=10, pady=10)

@@ -3,6 +3,7 @@ import time
 from tkinter import *
 from tkinter import messagebox, font
 from gui.Body import Body
+from gui.ControlTabs import ControlTabs
 from gui.Footer import Footer
 from gui.Header import Header
 from gui.JogFrame import JogFrame
@@ -56,12 +57,13 @@ class UserInterface:
         self.header = Header(self.colors, self.root, connection_manager, application_settings, motion)
         self.body = Body(self.colors, self.root, connection_manager, application_settings, motion)
         self.jog_frame = JogFrame(self.colors, self.root, connection_manager, application_settings, motion)
+        self.control_tabs = ControlTabs(self.colors, self.root, connection_manager, application_settings, motion)
         self.scan_frame = ScanFrame(self.colors, self.root, connection_manager, application_settings, motion)
         self.footer = Footer(self.colors, self.root, connection_manager, application_settings, motion)
 
         # Update Loop
         self.stop_update = True
-        self.update_loop_wait_time = 1
+        self.update_loop_wait_time = 100
         self.last_update_loop_time = None
 
     def startup(self, loop_thread: threading.Thread):
@@ -75,6 +77,7 @@ class UserInterface:
         self.body.draw()
         self.scan_frame.draw()
         self.jog_frame.draw()
+        self.control_tabs.draw()
         self.footer.draw()
 
         # Start Update Loop
@@ -95,11 +98,12 @@ class UserInterface:
                 self.motion.machine_config.read_config_from_system(self.connection_manager.client)
                 self.motion.commands.populate_commands(self.connection_manager.client)
                 self.motion.outputs.populate_outputs(self.connection_manager.client)
-                self.body.create_status_labels()
+                self.control_tabs.axis_status.create_status_labels()
 
                 # Update UI
                 self.footer.connection_status_display.configure(text="Connected")
                 self.header.draw()
+                self.control_tabs.offset_jog.draw()
                 self.jog_frame.draw()
 
             # On Disconnect From PLC
@@ -108,15 +112,20 @@ class UserInterface:
                 self.footer.connection_status_display.configure(text="Disconnected")
 
             # Update Axis Data
-            self.motion.update(self.connection_manager.client)
+            if self.connection_manager.is_connected():
+                self.motion.update(self.connection_manager.client)
 
             # Update Status Labels
             if self.connection_manager.is_connected():
-                self.body.update_status_labels()
+                self.control_tabs.axis_status.update_status_labels()
 
             # Update Jog Controls
             for x in self.jog_frame.jog_controls:
                 x.update()
+            for x in self.control_tabs.offset_jog.jog_controls:
+                x.update()
+
+            # Update Header Controls
             if link_status_cache != self.motion.link_status:
                 self.jog_frame.draw()
                 self.header.draw()
@@ -143,7 +152,7 @@ class UserInterface:
 
     def cleanup(self):
         self.stop_update = True
-        time.sleep(self.last_update_loop_time)
+        time.sleep(self.last_update_loop_time * 1.5)
         self.connection_manager.disconnect()
         self.root.update()
         self.root.destroy()

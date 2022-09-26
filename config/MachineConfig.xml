@@ -22,6 +22,13 @@
       <Linkable>False</Linkable>
       <Offset>False</Offset>
     </Axis>
+    <Axis>
+      <Name>Offset</Name>
+      <AxisNo>4</AxisNo>
+      <Rotary>False</Rotary>
+      <Linkable>False</Linkable>
+      <Offset>True</Offset>
+    </Axis>
   </AxisList>
   <DefaultScanType>P2P</DefaultScanType>
   <AvailableScanTypes>

@@ -34,7 +34,7 @@ class ScanFrame:
     def draw(self):
 
         self.scan_frame.configure(bg=self.colors[3])
-        self.scan_frame.grid(row=1, column=1, rowspan=3, sticky=E + N + S)
+        self.scan_frame.grid(row=1, column=2, rowspan=3, sticky=E + N + S)
 
         if self.selected_scan_mode is None:
             self.selected_scan_mode = self.motion.machine_config.default_scan_type

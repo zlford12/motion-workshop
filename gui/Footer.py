@@ -27,7 +27,7 @@ class Footer:
     def draw(self):
         self.footer.configure(bg=self.colors[2], height=20)
         self.footer.columnconfigure(100, weight=1)
-        self.footer.grid(row=4, column=0, columnspan=2, sticky=S + E + W)
+        self.footer.grid(row=4, column=0, columnspan=3, sticky=S + E + W)
         local_font = ("Arial", 10)
 
         for child in self.footer.winfo_children():
