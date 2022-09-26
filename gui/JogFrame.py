@@ -46,11 +46,19 @@ class JogFrame:
                 self.jog_frame, self.motion.axis_list[i], self.colors,
                 self.connection_manager, self.application_settings, self.motion
             ))
-            self.jog_controls[i].draw_controls(row, column)
-            row += 1
-            if row > int(self.application_settings.settings["JogControlHeight"]) - 1:
-                row = 0
-                column += 1
+
+            connected_linked_axis = self.connection_manager.is_connected() and self.motion.link_status and \
+                not self.motion.axis_list[i].axis_data.Linkable and not self.motion.axis_list[i].axis_data.Offset
+            connected_unlinked_axis = self.connection_manager.is_connected() and not self.motion.link_status and \
+                self.motion.axis_list[i].axis_data.Linkable and not self.motion.axis_list[i].axis_data.Offset
+            disconnected = not self.connection_manager.is_connected()
+
+            if connected_linked_axis or connected_unlinked_axis or disconnected:
+                self.jog_controls[i].draw_controls(row, column)
+                row += 1
+                if row > int(self.application_settings.settings["JogControlHeight"]) - 1:
+                    row = 0
+                    column += 1
 
         # Display Jog UI
         self.jog_canvas.grid(row=2, column=0, sticky=S + E + W)
