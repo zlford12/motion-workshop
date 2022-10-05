@@ -95,10 +95,10 @@ class JogControl:
 
         # Bind Widgets
         self.jog_negative_button.bind(
-            "<ButtonPress>", lambda state: self.jog_negative(True, 0)
+            "<ButtonPress>", lambda state: self.jog_negative(True, 2)
         )
         self.jog_negative_button.bind(
-            "<ButtonRelease>", lambda state: self.jog_negative(False, 0)
+            "<ButtonRelease>", lambda state: self.jog_negative(False, 2)
         )
         self.jog_negative_slow_button.bind(
             "<ButtonPress>", lambda state: self.jog_negative(True, 1)
@@ -107,10 +107,10 @@ class JogControl:
             "<ButtonRelease>", lambda state: self.jog_negative(False, 1)
         )
         self.jog_positive_button.bind(
-            "<ButtonPress>", lambda state: self.jog_positive(True, 0)
+            "<ButtonPress>", lambda state: self.jog_positive(True, 2)
         )
         self.jog_positive_button.bind(
-            "<ButtonRelease>", lambda state: self.jog_positive(False, 0)
+            "<ButtonRelease>", lambda state: self.jog_positive(False, 2)
         )
         self.jog_positive_slow_button.bind(
             "<ButtonPress>", lambda state: self.jog_positive(True, 1)
