@@ -44,9 +44,9 @@ class Motion:
                 c.client.get_node(
                     "ns=2;s=Application.PersistentVars.arAxisList[" + str(i + 1) + "].AxisNo"
                 ).get_value()
-            axis.axis_data.Rotary = c.node_list.axis_data[axis.axis_data.AxisNo][4].get_value()
-            axis.axis_data.Linkable = c.node_list.axis_data[axis.axis_data.AxisNo][5].get_value()
-            axis.axis_data.Offset = c.node_list.axis_data[axis.axis_data.AxisNo][6].get_value()
+            axis.axis_data.Rotary = c.node_list.axis_data[axis.axis_data.AxisNo + 1][4].get_value()
+            axis.axis_data.Linkable = c.node_list.axis_data[axis.axis_data.AxisNo + 1][5].get_value()
+            axis.axis_data.Offset = c.node_list.axis_data[axis.axis_data.AxisNo + 1][6].get_value()
             self.axis_list.append(axis)
 
     def update(self, c: ConnectionManagement):
@@ -56,7 +56,7 @@ class Motion:
                 # Local Vars
                 a1 = c.node_list.axis_data
                 a2 = c.node_list.axis_limits
-                i = axis.axis_data.AxisNo
+                i = axis.axis_data.AxisNo + 1
 
                 # Axis Data
                 axis.axis_data.Name = a1[i][0].get_value()

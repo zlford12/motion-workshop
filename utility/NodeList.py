@@ -55,7 +55,7 @@ class NodeList:
                 child.register()
                 self.command_names.append(child)
 
-        self.command = client.get_node("ns=2;s=Application.MNDT_Vars.arCommands")
+        self.command = client.get_node("ns=2;s=Application.MNDT_Vars.iCommand")
         self.command.register()
 
         # Diagnostics
