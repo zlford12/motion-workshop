@@ -94,10 +94,10 @@ class UserInterface:
             if self.connection_manager.is_connected() and \
                     (self.footer.connection_status_display["text"] == "Disconnected"):
                 # Get Data From PLC
-                self.motion.read_axes_from_system(self.connection_manager.client)
+                self.motion.read_axes_from_system(self.connection_manager)
                 self.motion.machine_config.read_config_from_system(self.connection_manager.client)
-                self.motion.commands.populate_commands(self.connection_manager.client)
-                self.motion.outputs.populate_outputs(self.connection_manager.client)
+                self.motion.commands.populate_commands(self.connection_manager)
+                self.motion.outputs.populate_outputs(self.connection_manager)
                 self.control_tabs.axis_status.create_status_labels()
 
                 # Update UI
@@ -113,7 +113,7 @@ class UserInterface:
 
             # Update Axis Data
             if self.connection_manager.is_connected():
-                self.motion.update(self.connection_manager.client)
+                self.motion.update(self.connection_manager)
 
             # Update Status Labels
             if self.connection_manager.is_connected():
@@ -149,6 +149,7 @@ class UserInterface:
 
             # Measure Update Loop Time
             self.last_update_loop_time = time.time() - start_time
+            # print(self.last_update_loop_time)
 
     def cleanup(self):
         self.stop_update = True

@@ -2,7 +2,7 @@ from motion.Axis import Axis
 from motion.MachineConfig import MachineConfig
 from motion.Commands import Commands
 from motion.Outputs import Outputs
-from opcua import Client
+from utility.ConnectionManagement import ConnectionManagement
 import xml.etree.ElementTree
 
 
@@ -31,69 +31,42 @@ class Motion:
             axis.axis_data.Offset = axis_element.find("Offset").text == "True"
             self.axis_list.append(axis)
 
-    def read_axes_from_system(self, client: Client):
+    def read_axes_from_system(self, c: ConnectionManagement):
         self.axis_list = []
-        number_of_axes = client.get_node("ns=2;s=Application.Custom_Vars.iNumberOfAxesToVar").get_value()
+        number_of_axes = c.client.get_node("ns=2;s=Application.Custom_Vars.iNumberOfAxesToVar").get_value()
         for i in range(number_of_axes):
             axis = Axis()
             axis.axis_data.Name = \
-                client.get_node(
+                c.client.get_node(
                     "ns=2;s=Application.PersistentVars.arAxisNames[" + str(i + 1) + "]"
                 ).get_value()
             axis.axis_data.AxisNo = \
-                client.get_node(
+                c.client.get_node(
                     "ns=2;s=Application.PersistentVars.arAxisList[" + str(i + 1) + "].AxisNo"
                 ).get_value()
-            axis.axis_data.Rotary = \
-                client.get_node(
-                    "ns=2;s=Application.MNDT_Vars.arMNDTAxisData[" + str(axis.axis_data.AxisNo) + "].Rotary"
-                ).get_value()
-            axis.axis_data.Linkable = \
-                client.get_node(
-                    "ns=2;s=Application.MNDT_Vars.arMNDTAxisData[" + str(axis.axis_data.AxisNo) + "].LinkableAxis"
-                ).get_value()
-            axis.axis_data.Offset = \
-                client.get_node(
-                    "ns=2;s=Application.MNDT_Vars.arMNDTAxisData[" + str(axis.axis_data.AxisNo) + "].OffsetAxis"
-                ).get_value()
+            axis.axis_data.Rotary = c.node_list.axis_data[axis.axis_data.AxisNo][4].get_value()
+            axis.axis_data.Linkable = c.node_list.axis_data[axis.axis_data.AxisNo][5].get_value()
+            axis.axis_data.Offset = c.node_list.axis_data[axis.axis_data.AxisNo][6].get_value()
             self.axis_list.append(axis)
 
-    def update(self, client: Client):
+    def update(self, c: ConnectionManagement):
+
         for axis in self.axis_list:
             try:
+                # Local Vars
+                a1 = c.node_list.axis_data
+                a2 = c.node_list.axis_limits
+                i = axis.axis_data.AxisNo
+
                 # Axis Data
-                axis.axis_data.Name = \
-                    client.get_node(
-                        "ns=2;s=Application.MNDT_Vars.arMNDTAxisData[" + str(axis.axis_data.AxisNo) + "].Name"
-                    ).get_value()
-                axis.axis_data.Rotary = \
-                    client.get_node(
-                        "ns=2;s=Application.MNDT_Vars.arMNDTAxisData[" + str(axis.axis_data.AxisNo) + "].Rotary"
-                    ).get_value()
-                axis.axis_data.Linkable = \
-                    client.get_node(
-                        "ns=2;s=Application.MNDT_Vars.arMNDTAxisData[" + str(axis.axis_data.AxisNo) + "].LinkableAxis"
-                    ).get_value()
-                axis.axis_data.Offset = \
-                    client.get_node(
-                        "ns=2;s=Application.MNDT_Vars.arMNDTAxisData[" + str(axis.axis_data.AxisNo) + "].OffsetAxis"
-                    ).get_value()
-                axis.axis_data.Position = \
-                    client.get_node(
-                        "ns=2;s=Application.MNDT_Vars.arMNDTAxisData[" + str(axis.axis_data.AxisNo) + "].Position"
-                    ).get_value()
-                axis.axis_data.Velocity = \
-                    client.get_node(
-                        "ns=2;s=Application.MNDT_Vars.arMNDTAxisData[" + str(axis.axis_data.AxisNo) + "].Velocity"
-                    ).get_value()
-                axis.axis_data.Torque = \
-                    client.get_node(
-                        "ns=2;s=Application.MNDT_Vars.arMNDTAxisData[" + str(axis.axis_data.AxisNo) + "].Torque"
-                    ).get_value()
-                status_bits = \
-                    client.get_node(
-                        "ns=2;s=Application.MNDT_Vars.arMNDTAxisData[" + str(axis.axis_data.AxisNo) + "].StatusBits"
-                    ).get_value()
+                axis.axis_data.Name = a1[i][0].get_value()
+                axis.axis_data.Rotary = a1[i][4].get_value()
+                axis.axis_data.Linkable = a1[i][5].get_value()
+                axis.axis_data.Offset = a1[i][6].get_value()
+                axis.axis_data.Position = a1[i][1].get_value()
+                axis.axis_data.Velocity = a1[i][2].get_value()
+                axis.axis_data.Torque = a1[i][3].get_value()
+                status_bits = a1[i][7].get_value()
                 axis.axis_data.Error = status_bits & (1 << 0) != 0
                 axis.axis_data.Power = status_bits & (1 << 0) != 0
                 axis.axis_data.Standstill = status_bits & (1 << 0) != 0
@@ -105,62 +78,24 @@ class Motion:
                 axis.axis_data.Stopping = status_bits & (1 << 0) != 0
 
                 # Axis Limits
-                axis.axis_limits.MinPosition = \
-                    client.get_node(
-                        "ns=2;s=Application.PersistentVars.arMNDTAxisLimits[" +
-                        str(axis.axis_data.AxisNo) + "].MinPosition"
-                    ).get_value()
-                axis.axis_limits.MaxPosition = \
-                    client.get_node(
-                        "ns=2;s=Application.PersistentVars.arMNDTAxisLimits[" +
-                        str(axis.axis_data.AxisNo) + "].MaxPosition"
-                    ).get_value()
-                axis.axis_limits.MinCrashPosition = \
-                    client.get_node(
-                        "ns=2;s=Application.PersistentVars.arMNDTAxisLimits[" +
-                        str(axis.axis_data.AxisNo) + "].MinCrashPosition"
-                    ).get_value()
-                axis.axis_limits.MaxCrashPosition = \
-                    client.get_node(
-                        "ns=2;s=Application.PersistentVars.arMNDTAxisLimits[" +
-                        str(axis.axis_data.AxisNo) + "].MaxCrashPosition"
-                    ).get_value()
-                axis.axis_limits.MaxVelocity = \
-                    client.get_node(
-                        "ns=2;s=Application.PersistentVars.arMNDTAxisLimits[" +
-                        str(axis.axis_data.AxisNo) + "].MaxVelocity"
-                    ).get_value()
-                axis.axis_limits.MaxAcceleration = \
-                    client.get_node(
-                        "ns=2;s=Application.PersistentVars.arMNDTAxisLimits[" +
-                        str(axis.axis_data.AxisNo) + "].MaxAcceleration"
-                    ).get_value()
-                axis.axis_limits.MaxDeceleration = \
-                    client.get_node(
-                        "ns=2;s=Application.PersistentVars.arMNDTAxisLimits[" +
-                        str(axis.axis_data.AxisNo) + "].MaxDeceleration"
-                    ).get_value()
-                axis.axis_limits.SetVelocity = \
-                    client.get_node(
-                        "ns=2;s=Application.PersistentVars.arMNDTAxisLimits[" +
-                        str(axis.axis_data.AxisNo) + "].SetVelocity"
-                    ).get_value()
-                axis.axis_limits.SetAcceleration = \
-                    client.get_node(
-                        "ns=2;s=Application.PersistentVars.arMNDTAxisLimits[" +
-                        str(axis.axis_data.AxisNo) + "].SetAcceleration"
-                    ).get_value()
-                axis.axis_limits.SetDeceleration = \
-                    client.get_node(
-                        "ns=2;s=Application.PersistentVars.arMNDTAxisLimits[" +
-                        str(axis.axis_data.AxisNo) + "].SetDeceleration"
-                    ).get_value()
+                axis.axis_limits.MinPosition = a2[i][1].get_value()
+                axis.axis_limits.MaxPosition = a2[i][0].get_value()
+                axis.axis_limits.MinCrashPosition = a2[i][11].get_value()
+                axis.axis_limits.MaxCrashPosition = a2[i][10].get_value()
+                axis.axis_limits.MaxVelocity = a2[i][2].get_value()
+                axis.axis_limits.MaxAcceleration = a2[i][4].get_value()
+                axis.axis_limits.MaxDeceleration = a2[i][6].get_value()
+                axis.axis_limits.SetVelocity = a2[i][12].get_value()
+                axis.axis_limits.SetAcceleration = a2[i][13].get_value()
+                axis.axis_limits.SetDeceleration = a2[i][14].get_value()
+
             except Exception as e:
                 self.communication_error = True
                 self.error_message = e
+                print(e)
 
         try:
-            self.link_status = client.get_node(
+            self.link_status = c.client.get_node(
                 "ns=2;s=Application.MNDT_Vars.arOutputs[" + str(self.outputs.output_list["Linked"]) + "]"
             ).get_value()
         except Exception as e:

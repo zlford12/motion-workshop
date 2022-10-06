@@ -1,5 +1,6 @@
 from opcua import Client
 import time
+from utility.NodeList import NodeList
 
 
 class ConnectionManagement:
@@ -10,6 +11,7 @@ class ConnectionManagement:
         self.client = Client("")
         self.error = False
         self.error_message = ""
+        self.node_list = NodeList()
 
     def is_connected(self):
         if self.connection_desired:
@@ -32,6 +34,7 @@ class ConnectionManagement:
                 self.connection_desired = True
                 self.client = Client("opc.tcp://" + ip + ":4840", timeout=3)
                 self.client.connect()
+                self.node_list.get_nodes(self.client)
         except Exception as e:
             self.connection_desired = False
             self.error = True

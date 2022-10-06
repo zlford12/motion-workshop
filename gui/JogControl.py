@@ -350,7 +350,7 @@ class JogControl:
             i = self.axis.axis_data.AxisNo
             client.get_node(
                 "ns=2;s=Application.MNDT_Vars.iJogMultiplierIndex"
-            ).set_value(0, varianttype=ua.VariantType.Int16)
+            ).set_value(2, varianttype=ua.VariantType.Int16)
             client.get_node(
                 "ns=2;s=Application.MNDT_Vars.arGoToPosition[" + str(i) + "]"
             ).set_value(float(self.go_to_entry.get()), ua.VariantType.Float)
@@ -396,7 +396,7 @@ class JogControl:
 
                 self.motion.commands.command(self.connection_manager, "ReloadAxisInfo")
 
-                self.motion.update(self.connection_manager.client)
+                self.motion.update(self.connection_manager)
 
             # Update Set Limit Values
             if self.velocity_entry.get() != str(self.axis.axis_limits.SetVelocity) or \
@@ -441,7 +441,7 @@ class JogControl:
 
                 self.motion.commands.command(self.connection_manager, "ReloadAxisInfo")
 
-                self.motion.update(self.connection_manager.client)
+                self.motion.update(self.connection_manager)
 
         # Draw Controls
         self.draw_controls(self.row, self.column)

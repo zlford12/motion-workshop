@@ -1,14 +1,12 @@
-from opcua import Client, ua
+from utility.ConnectionManagement import ConnectionManagement
 
 
 class Outputs:
     def __init__(self):
         self.output_list = {}
 
-    def populate_outputs(self, client=Client("")):
+    def populate_outputs(self, c: ConnectionManagement):
         self.output_list = {}
-        output_names = client.get_node("ns=2;s=Application.MNDT_Vars.arOutputNames").get_children()
-        for i in range(len(output_names)):
-            if output_names[i].get_value() != "" \
-                    and output_names[i].get_data_type_as_variant_type() == ua.VariantType.String:
-                self.output_list[output_names[i].get_value()] = i
+        for i in range(len(c.node_list.output_names)):
+            if c.node_list.output_names[i].get_value() != "":
+                self.output_list[c.node_list.output_names[i].get_value()] = i
