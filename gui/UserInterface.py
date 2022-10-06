@@ -131,6 +131,9 @@ class UserInterface:
                 self.header.draw()
                 link_status_cache = self.motion.link_status
 
+            # Update Footer
+            self.footer.loop_time_display.configure(text=str(self.last_update_loop_time)[0:3] + "s")
+
             # Check For Connection Management Error
             if self.connection_manager.error:
                 self.connection_manager.error = False
@@ -149,7 +152,6 @@ class UserInterface:
 
             # Measure Update Loop Time
             self.last_update_loop_time = time.time() - start_time
-            # print(self.last_update_loop_time)
 
     def cleanup(self):
         self.stop_update = True
