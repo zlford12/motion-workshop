@@ -1,4 +1,4 @@
-from opcua import Client
+from utility.ConnectionManagement import ConnectionManagement
 import xml.etree.ElementTree
 
 
@@ -21,5 +21,5 @@ class MachineConfig:
         for safety_device in config.find("SafetyDevices").findall("SafetyDevice"):
             self.safety_devices.append(safety_device.text)
 
-    def read_config_from_system(self, client=Client("to be determined", timeout=3)):
+    def read_config_from_system(self, c: ConnectionManagement):
         return

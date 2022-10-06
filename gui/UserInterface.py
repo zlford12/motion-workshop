@@ -95,7 +95,7 @@ class UserInterface:
                     (self.footer.connection_status_display["text"] == "Disconnected"):
                 # Get Data From PLC
                 self.motion.read_axes_from_system(self.connection_manager)
-                self.motion.machine_config.read_config_from_system(self.connection_manager.client)
+                self.motion.machine_config.read_config_from_system(self.connection_manager)
                 self.motion.commands.populate_commands(self.connection_manager)
                 self.motion.outputs.populate_outputs(self.connection_manager)
                 self.control_tabs.axis_status.create_status_labels()
@@ -132,7 +132,7 @@ class UserInterface:
                 link_status_cache = self.motion.link_status
 
             # Update Footer
-            self.footer.loop_time_display.configure(text=str(self.last_update_loop_time)[0:3] + "s")
+            self.footer.loop_time_display.configure(text=str(self.last_update_loop_time)[0:4] + "s")
 
             # Check For Connection Management Error
             if self.connection_manager.error:
