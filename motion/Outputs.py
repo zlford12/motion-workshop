@@ -7,6 +7,7 @@ class Outputs:
 
     def populate_outputs(self, c: ConnectionManagement):
         self.output_list = {}
-        for i in range(len(c.node_list.output_names)):
-            if c.node_list.output_names[i].get_value() != "":
-                self.output_list[c.node_list.output_names[i].get_value()] = i
+        output_names = c.client.get_values(c.node_list.output_names)
+        for i in range(len(output_names)):
+            if output_names[i]!= "":
+                self.output_list[output_names[i]] = i

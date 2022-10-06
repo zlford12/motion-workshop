@@ -17,6 +17,7 @@ class Commands:
 
     def populate_commands(self, c: ConnectionManagement):
         self.command_list = {}
-        for i in range(len(c.node_list.command_names)):
-            if c.node_list.command_names[i].get_value() != "":
-                self.command_list[c.node_list.command_names[i].get_value()] = i
+        command_names = c.client.get_values(c.node_list.command_names)
+        for i in range(len(command_names)):
+            if command_names[i] != "":
+                self.command_list[command_names[i]] = i

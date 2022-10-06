@@ -63,7 +63,7 @@ class UserInterface:
 
         # Update Loop
         self.stop_update = True
-        self.update_loop_wait_time = 100
+        self.update_loop_wait_time = 10
         self.last_update_loop_time = None
 
     def startup(self, loop_thread: threading.Thread):
