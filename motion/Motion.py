@@ -59,14 +59,16 @@ class Motion:
                 i = axis.axis_data.AxisNo + 1
 
                 # Axis Data
-                axis.axis_data.Name = a1[i][0].get_value()
-                axis.axis_data.Rotary = a1[i][4].get_value()
-                axis.axis_data.Linkable = a1[i][5].get_value()
-                axis.axis_data.Offset = a1[i][6].get_value()
-                axis.axis_data.Position = a1[i][1].get_value()
-                axis.axis_data.Velocity = a1[i][2].get_value()
-                axis.axis_data.Torque = a1[i][3].get_value()
-                status_bits = a1[i][7].get_value()
+                values = c.client.get_values(a1[i])
+                axis.axis_data.Name = values[0]
+                axis.axis_data.Rotary = values[4]
+                axis.axis_data.Linkable = values[5]
+                axis.axis_data.Offset = values[6]
+                axis.axis_data.Position = values[1]
+                axis.axis_data.Velocity = values[2]
+                axis.axis_data.Torque = values[3]
+                status_bits = values[7]
+
                 axis.axis_data.Error = status_bits & (1 << 0) != 0
                 axis.axis_data.Power = status_bits & (1 << 0) != 0
                 axis.axis_data.Standstill = status_bits & (1 << 0) != 0
@@ -78,16 +80,17 @@ class Motion:
                 axis.axis_data.Stopping = status_bits & (1 << 0) != 0
 
                 # Axis Limits
-                axis.axis_limits.MinPosition = a2[i][1].get_value()
-                axis.axis_limits.MaxPosition = a2[i][0].get_value()
-                axis.axis_limits.MinCrashPosition = a2[i][11].get_value()
-                axis.axis_limits.MaxCrashPosition = a2[i][10].get_value()
-                axis.axis_limits.MaxVelocity = a2[i][2].get_value()
-                axis.axis_limits.MaxAcceleration = a2[i][4].get_value()
-                axis.axis_limits.MaxDeceleration = a2[i][6].get_value()
-                axis.axis_limits.SetVelocity = a2[i][12].get_value()
-                axis.axis_limits.SetAcceleration = a2[i][13].get_value()
-                axis.axis_limits.SetDeceleration = a2[i][14].get_value()
+                values = c.client.get_values(a2[i])
+                axis.axis_limits.MinPosition = values[1]
+                axis.axis_limits.MaxPosition = values[0]
+                axis.axis_limits.MinCrashPosition = values[11]
+                axis.axis_limits.MaxCrashPosition = values[10]
+                axis.axis_limits.MaxVelocity = values[2]
+                axis.axis_limits.MaxAcceleration = values[4]
+                axis.axis_limits.MaxDeceleration = values[6]
+                axis.axis_limits.SetVelocity = values[12]
+                axis.axis_limits.SetAcceleration = values[13]
+                axis.axis_limits.SetDeceleration = values[14]
 
             except Exception as e:
                 self.communication_error = True

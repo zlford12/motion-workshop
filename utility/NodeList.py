@@ -21,7 +21,6 @@ class NodeList:
                 structure = []
                 for node in child.get_children():
                     structure.append(node)
-                    node.register()
                 self.axis_data.append(structure)
 
         # Axis Limits
@@ -31,7 +30,6 @@ class NodeList:
                 structure = []
                 for node in child.get_children():
                     structure.append(node)
-                    node.register()
                 self.axis_limits.append(structure)
 
         # Outputs
@@ -39,12 +37,10 @@ class NodeList:
         self.outputs = []
         for child in client.get_node("ns=2;s=Application.MNDT_Vars.arOutputNames").get_children():
             if child.get_data_type_as_variant_type() == ua.VariantType.String:
-                child.register()
                 self.output_names.append(child)
 
         for child in client.get_node("ns=2;s=Application.MNDT_Vars.arOutputs").get_children():
             if child.get_data_type_as_variant_type() == ua.VariantType.Boolean:
-                child.register()
                 self.outputs.append(child)
 
         # Commands
@@ -52,19 +48,15 @@ class NodeList:
         self.command = []
         for child in client.get_node("ns=2;s=Application.MNDT_Vars.arCommandNames").get_children():
             if child.get_data_type_as_variant_type() == ua.VariantType.String:
-                child.register()
                 self.command_names.append(child)
 
         self.command = client.get_node("ns=2;s=Application.MNDT_Vars.iCommand")
-        self.command.register()
 
         # Diagnostics
         self.plc_status = client.get_node("ns=18;s=System.DisplayedDiagnosis")
-        self.plc_status.register()
 
         self.axis_status = []
         for child in client.get_node("ns=12;s=Motion.AxisSet.LocalControl").get_children():
             for node in child.get_children():
                 if "DiagnosisText" in str(node):
-                    node.register()
                     self.axis_status.append(node)
