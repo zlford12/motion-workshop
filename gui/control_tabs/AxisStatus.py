@@ -80,11 +80,16 @@ class AxisStatus:
             text = self.connection_manager.node_list.plc_status.get_value()
             self.plc_status.configure(text=text)
 
+            axis_status_values = \
+                self.connection_manager.client.get_values(self.connection_manager.node_list.axis_status)
+            axis_status_nodes = \
+                self.connection_manager.node_list.axis_status
+
             for label, axis_number in self.axis_status:
                 if axis_number > 0:
-                    for status_node in self.connection_manager.node_list.axis_status:
-                        if ("Axis" + str(axis_number)) in str(status_node):
-                            text = status_node.get_value()
+                    for i in range(len(axis_status_nodes)):
+                        if ("Axis" + str(axis_number)) in str(axis_status_nodes[i]):
+                            text = axis_status_values[i]
 
                     name = ""
                     for axis in self.motion.axis_list:
