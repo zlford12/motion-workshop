@@ -13,13 +13,10 @@ class Commands:
             else:
                 command_int = self.command_list[command_name]
 
-            c.client.get_node("ns=2;s=Application.MNDT_Vars.iCommand")\
-                .set_value(int(command_int), ua.VariantType.Int16)
+            c.node_list.command.set_value(int(command_int), ua.VariantType.Int16)
 
     def populate_commands(self, c: ConnectionManagement):
         self.command_list = {}
-        command_names = c.client.get_node("ns=2;s=Application.MNDT_Vars.arCommandNames").get_children()
-        for i in range(len(command_names)):
-            if command_names[i].get_value() != "" \
-                    and command_names[i].get_data_type_as_variant_type() == ua.VariantType.String:
-                self.command_list[command_names[i].get_value()] = i
+        for i in range(len(c.node_list.command_names)):
+            if c.node_list.command_names[i].get_value() != "":
+                self.command_list[c.node_list.command_names[i].get_value()] = i

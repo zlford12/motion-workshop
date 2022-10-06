@@ -10,6 +10,8 @@ class NodeList:
         self.outputs = [opcua.Node]
         self.command_names = [opcua.Node]
         self.command = opcua.Node
+        self.plc_status = opcua.Node
+        self.axis_status = [opcua.Node]
 
     def get_nodes(self, client: Client):
         # Axis Data
@@ -55,3 +57,14 @@ class NodeList:
 
         self.command = client.get_node("ns=2;s=Application.MNDT_Vars.arCommands")
         self.command.register()
+
+        # Diagnostics
+        self.plc_status = client.get_node("ns=18;s=System.DisplayedDiagnosis")
+        self.plc_status.register()
+
+        self.axis_status = []
+        for child in client.get_node("ns=12;s=Motion.AxisSet.LocalControl").get_children():
+            for node in child.get_children():
+                if "DiagnosisText" in str(node):
+                    node.register()
+                    self.axis_status.append(node)

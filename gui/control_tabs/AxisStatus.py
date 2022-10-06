@@ -77,18 +77,14 @@ class AxisStatus:
 
     def update_status_labels(self):
         try:
-            text = \
-                self.connection_manager.client.get_node(
-                    "ns=18;s=System.DisplayedDiagnosis"
-                ).get_value()
+            text = self.connection_manager.node_list.plc_status.get_value()
             self.plc_status.configure(text=text)
 
             for label, axis_number in self.axis_status:
                 if axis_number > 0:
-                    text = \
-                        self.connection_manager.client.get_node(
-                            "ns=12;s=Motion.AxisSet.LocalControl.Axis" + str(axis_number) + ".DiagnosisText"
-                        ).get_value()
+                    for status_node in self.connection_manager.node_list.axis_status:
+                        if ("Axis" + str(axis_number)) in str(status_node):
+                            text = status_node.get_value()
 
                     name = ""
                     for axis in self.motion.axis_list:
