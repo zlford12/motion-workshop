@@ -1,13 +1,19 @@
+import opcua
+from opcua import ua
 from tkinter import *
+from utility.ConnectionManagement import ConnectionManagement
 
 
 class P2P:
-    def __init__(self, frame, colors):
+    def __init__(self, frame, colors, c: ConnectionManagement):
         # Create Frames
         self.frame = frame
         self.colors = colors
         self.control_frame = Frame(self.frame)
         self.points_frame = Frame(self.frame)
+
+        # Connection Manager
+        self.c = c
 
         # Create Widgets
         self.start_button = Button(self.control_frame)
@@ -28,6 +34,7 @@ class P2P:
         self.dwell_time_entry = Entry(self.control_frame)
         self.dwell_time_unit = Label(self.control_frame)
         self.vector_mode_selection = Checkbutton(self.control_frame)
+        self.vector_mode_value = IntVar()
 
         self.add_point_button = Button(self.control_frame)
         self.remove_point_button = Button(self.control_frame)
@@ -44,7 +51,8 @@ class P2P:
 
         # Configure Widgets
         self.start_button.configure(
-            text="Start Scan", width=12, height=2, bg=self.colors[4]
+            text="Start Scan", width=12, height=2, bg=self.colors[4],
+            command=lambda: self.start_scan()
         )
         self.stop_button.configure(
             text="Stop Scan", width=12, height=2, bg=self.colors[4]
@@ -95,7 +103,8 @@ class P2P:
             text="ms", bg=self.colors[3], font=label_font, justify=LEFT
         )
         self.vector_mode_selection.configure(
-            text="Vector Mode", bg=self.colors[3], font=label_font, justify=LEFT
+            text="Vector Mode", bg=self.colors[3], font=label_font, justify=LEFT,
+            variable=self.vector_mode_value
         )
 
     def draw_controls(self):
@@ -160,3 +169,39 @@ class P2P:
         self.vector_mode_selection.grid(
             row=5, column=2, rowspan=2, padx=5, pady=5
         )
+
+    def start_scan(self):
+        # Read Scan Parameter Node
+        node_array: [opcua.Node] = []
+        for child in self.c.client.get_node(
+            "ns=2;s=Application.P2P_Vars.arP2PValues"
+        ).get_children():
+            if child.get_data_type_as_variant_type() == ua.VariantType.Double:
+                node_array.append(child)
+        values_array: [float] = [float(0)] * len(node_array)
+
+        # Set Scan Parameters
+        values_array[0] = float(self.linear_velocity_entry.get())
+        values_array[1] = float(self.rotary_velocity_entry.get())
+        values_array[2] = float(self.dwell_time_entry.get())
+        values_array[3] = float(self.linear_position_delta_entry.get())
+        values_array[4] = float(self.rotary_position_delta_entry.get())
+        values_array[5] = float(self.vector_mode_value.get())
+
+        values_array[10] = float(1)     # X
+        values_array[11] = float(2)     # Y
+        values_array[12] = float(3)     # Z
+        values_array[13] = float(4)     # S
+        values_array[14] = float(5)     # G
+
+        values_array[20] = float(5000)  # X
+        values_array[21] = float(1800)   # Y
+        values_array[22] = float(500)   # Z
+        values_array[23] = float(0)     # S
+        values_array[24] = float(0)     # G
+
+        # Write Scan Parameters
+        self.c.client.set_values(node_array, values_array)
+
+        # Start Scan
+        self.c.client.get_node("ns=2;s=Application.P2P_Vars.iP2PCommand").set_value(1, varianttype=ua.VariantType.Int16)

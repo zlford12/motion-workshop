@@ -39,5 +39,6 @@ class ScanFrame:
         if self.selected_scan_mode is None:
             self.selected_scan_mode = self.motion.machine_config.default_scan_type
 
-        self.scan_controls = self.scan_types[self.selected_scan_mode](self.scan_frame, self.colors)
+        self.scan_controls = \
+            self.scan_types[self.selected_scan_mode](self.scan_frame, self.colors, self.connection_manager)
         self.scan_controls.draw_controls()
