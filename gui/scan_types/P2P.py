@@ -1,6 +1,7 @@
 import opcua
 from opcua import ua
 from tkinter import *
+from tkinter import ttk
 from utility.ConnectionManagement import ConnectionManagement
 
 
@@ -41,6 +42,18 @@ class P2P:
         self.copy_point_button = Button(self.control_frame)
         self.go_to_point_button = Button(self.control_frame)
 
+        self.position_divider = ttk.Separator(self.control_frame)
+        self.x_position_label = Label(self.control_frame)
+        self.x_position_entry = Entry(self.control_frame)
+        self.y_position_label = Label(self.control_frame)
+        self.y_position_entry = Entry(self.control_frame)
+        self.z_position_label = Label(self.control_frame)
+        self.z_position_entry = Entry(self.control_frame)
+        self.s_position_label = Label(self.control_frame)
+        self.s_position_entry = Entry(self.control_frame)
+        self.g_position_label = Label(self.control_frame)
+        self.g_position_entry = Entry(self.control_frame)
+
     def configure(self):
         # Configure Frame
         self.control_frame.configure(bg=self.colors[3], width=500)
@@ -73,7 +86,7 @@ class P2P:
             width=entry_width
         )
         self.rotary_velocity_unit.configure(
-            text="RPM", bg=self.colors[3], font=label_font, justify=LEFT
+            text="deg/s", bg=self.colors[3], font=label_font, justify=LEFT
         )
         self.linear_position_delta_label.configure(
             text="Linear Position\nDelta", bg=self.colors[3], font=label_font, justify=LEFT
@@ -105,6 +118,40 @@ class P2P:
         self.vector_mode_selection.configure(
             text="Vector Mode", bg=self.colors[3], font=label_font, justify=LEFT,
             variable=self.vector_mode_value
+        )
+
+        self.position_divider.configure(
+            orient=HORIZONTAL
+        )
+        self.x_position_label.configure(
+            text="Xv", bg=self.colors[3], font=label_font, justify=LEFT
+        )
+        self.x_position_entry.configure(
+            width=entry_width
+        )
+        self.y_position_label.configure(
+            text="Yv", bg=self.colors[3], font=label_font, justify=LEFT
+        )
+        self.y_position_entry.configure(
+            width=entry_width
+        )
+        self.z_position_label.configure(
+            text="Zv", bg=self.colors[3], font=label_font, justify=LEFT
+        )
+        self.z_position_entry.configure(
+            width=entry_width
+        )
+        self.s_position_label.configure(
+            text="Sv", bg=self.colors[3], font=label_font, justify=LEFT
+        )
+        self.s_position_entry.configure(
+            width=entry_width
+        )
+        self.g_position_label.configure(
+            text="Gv", bg=self.colors[3], font=label_font, justify=LEFT
+        )
+        self.g_position_entry.configure(
+            width=entry_width
         )
 
     def draw_controls(self):
@@ -170,6 +217,40 @@ class P2P:
             row=5, column=2, rowspan=2, padx=5, pady=5
         )
 
+        self.position_divider.grid(
+            row=7, column=1, columnspan=4
+        )
+        self.x_position_label.grid(
+            row=8, column=0, columnspan=2, padx=5, pady=5, sticky=E
+        )
+        self.x_position_entry.grid(
+            row=8, column=2, columnspan=2, padx=5, pady=5, sticky=W
+        )
+        self.y_position_label.grid(
+            row=9, column=0, columnspan=2, padx=5, pady=5, sticky=E
+        )
+        self.y_position_entry.grid(
+            row=9, column=2, columnspan=2, padx=5, pady=5, sticky=W
+        )
+        self.z_position_label.grid(
+            row=10, column=0, columnspan=2, padx=5, pady=5, sticky=E
+        )
+        self.z_position_entry.grid(
+            row=10, column=2, columnspan=2, padx=5, pady=5, sticky=W
+        )
+        self.s_position_label.grid(
+            row=11, column=0, columnspan=2, padx=5, pady=5, sticky=E
+        )
+        self.s_position_entry.grid(
+            row=11, column=2, columnspan=2, padx=5, pady=5, sticky=W
+        )
+        self.g_position_label.grid(
+            row=12, column=0, columnspan=2, padx=5, pady=5, sticky=E
+        )
+        self.g_position_entry.grid(
+            row=12, column=2, columnspan=2, padx=5, pady=5, sticky=W
+        )
+
     def start_scan(self):
         # Read Scan Parameter Node
         node_array: [opcua.Node] = []
@@ -194,11 +275,11 @@ class P2P:
         values_array[13] = float(4)     # S
         values_array[14] = float(5)     # G
 
-        values_array[20] = float(5000)  # X
-        values_array[21] = float(1800)   # Y
-        values_array[22] = float(500)   # Z
-        values_array[23] = float(0)     # S
-        values_array[24] = float(0)     # G
+        values_array[20] = float(self.x_position_entry.get())
+        values_array[21] = float(self.y_position_entry.get())
+        values_array[22] = float(self.z_position_entry.get())
+        values_array[23] = float(self.s_position_entry.get())
+        values_array[24] = float(self.g_position_entry.get())
 
         # Write Scan Parameters
         self.c.client.set_values(node_array, values_array)
