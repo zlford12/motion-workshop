@@ -30,7 +30,7 @@ class Header:
 
         self.header.configure(bg=self.colors[2])
         self.header.grid(row=0, column=0, columnspan=3, sticky=N + E + W)
-        self.header.grid_columnconfigure(100, weight=1)
+        self.header.grid_columnconfigure(99, weight=1)
 
         # Link Unlink Button
         if self.motion.link_status:
@@ -54,4 +54,12 @@ class Header:
             text="Reset", width=button_x, height=button_y, bg=self.colors[3],
             command=lambda: self.motion.commands.command(self.connection_manager, "Reset")
         )
-        clear_error_button.grid(row=0, column=100, sticky=E, padx=10, pady=10)
+        clear_error_button.grid(row=0, column=99, sticky=E, padx=(10, 0), pady=10)
+
+        # Stop All Axes Button
+        stop_all_axes_button = Button(self.header)
+        stop_all_axes_button.configure(
+            text="Stop All\nAxes", width=button_x, height=button_y, bg=self.colors[3],
+            command=lambda: self.motion.commands.command(self.connection_manager, "StopAllAxes")
+        )
+        stop_all_axes_button.grid(row=0, column=100, sticky=E, padx=10, pady=10)

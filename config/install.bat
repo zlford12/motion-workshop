@@ -1,1 +1,1 @@
-pyinstaller SetLimits.py -w --hidden-import opcua,tkinter --collect-all opcua
+pyinstaller MotionWorkshop.py -w --hidden-import opcua,tkinter --collect-all opcua

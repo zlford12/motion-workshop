@@ -2,6 +2,7 @@ from tkinter import *
 from opcua import ua
 from motion.Motion import Motion
 from motion.Axis import Axis
+import struct
 from utility.ApplicationSettings import ApplicationSettings
 from utility.ConnectionManagement import ConnectionManagement
 
@@ -371,12 +372,15 @@ class JogControl:
                 name_input = self.name_entry.get()
                 name_bytes = []
                 values = []
+
+                # Create Array Of Characters As Bytes
                 for b in range(64):
                     if b < len(name_input):
                         name_bytes.append(name_input[b])
                     else:
                         name_bytes.append("")
 
+                    # Create Array Of 8 Byte Words
                     if ((b + 1) % 8) == 0:
                         word = ""
                         for c in range(8):
@@ -384,13 +388,22 @@ class JogControl:
                         values.append(word[::-1].encode("ascii"))
 
                 for i in range(len(values)):
+
+                    # Convert Bytes To Double Precision Float
+                    if len(values[i]) < 8:
+                        extension = bytearray(values[i])
+                        extension.extend(bytes(8 - len(values[i])))
+                        values[i] = bytes(extension)
+                    float_value = struct.unpack('d', values[i])[0]
+
+                    # Send To PLC
                     self.connection_manager.client.get_node(
                         "ns=2;s=Application.MNDT_Vars.arValues[" + str(i + 1) + "]"
-                    ).set_value(int.from_bytes(values[i], 'little'), varianttype=ua.VariantType.UInt64)
+                    ).set_value(float_value, varianttype=ua.VariantType.Double)
 
                 self.connection_manager.client.get_node(
                     "ns=2;s=Application.MNDT_Vars.arValues[0]"
-                ).set_value(self.axis.axis_data.AxisNo, varianttype=ua.VariantType.UInt64)
+                ).set_value(float(self.axis.axis_data.AxisNo), varianttype=ua.VariantType.Double)
 
                 self.motion.commands.command(self.connection_manager, "RenameAxis")
 
