@@ -45,6 +45,9 @@ class UserInterface:
         self.root.grid_columnconfigure(0, weight=1)
         self.root.grid_rowconfigure(1, weight=1)
 
+        # Icon
+        self.root.iconphoto(False, PhotoImage(file='config/icon.png'))
+
         # Font
         self.default_font = font.nametofont("TkDefaultFont").configure(
             family="Arial Black",
