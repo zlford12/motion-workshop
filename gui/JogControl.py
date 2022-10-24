@@ -200,7 +200,7 @@ class JogControl:
             velocity_unit = "RPM"
             acceleration_unit = "rad/s^2"
         else:
-            velocity_unit = "mm/min"
+            velocity_unit = "mm/s"
             acceleration_unit = "mm/s^2"
 
         # Configure Frames
