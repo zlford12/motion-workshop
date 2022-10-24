@@ -1,2 +1,2 @@
 pyinstaller MotionWorkshop.py -w -i "config/icon.png"
-cp config/* dist/MotionWorkshop/config
+xcopy "./config" "./dist/MotionWorkshop/config/" /s /y
