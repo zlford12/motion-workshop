@@ -1,3 +1,4 @@
+from gui.menu_bar.ApplicationSettingsMenu import ApplicationSettingsMenu
 from tkinter import *
 from motion.Motion import Motion
 from utility.ConnectionManagement import ConnectionManagement
@@ -21,6 +22,11 @@ class MenuBar:
         # Frame
         self.menu_bar = Menu(self.root)
 
+        # Menu Objects
+        self.application_settings_menu = ApplicationSettingsMenu(
+            self.colors, self.root, self.application_settings
+        )
+
     def draw(self):
         # File Menu
         file_menu = Menu(self.menu_bar, tearoff=0)
@@ -30,7 +36,7 @@ class MenuBar:
         )
         file_menu.add_command(
             label="Application Settings",
-            command=self.dummy_function
+            command=self.application_settings_menu.open_settings
         )
 
         # System Menu
