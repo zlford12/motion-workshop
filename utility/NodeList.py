@@ -12,6 +12,7 @@ class NodeList:
         self.command = opcua.Node
         self.plc_status = opcua.Node
         self.axis_status = [opcua.Node]
+        self.scan_types = [opcua.Node]
 
     def get_nodes(self, client: Client):
         # Axis Data
@@ -60,3 +61,9 @@ class NodeList:
             for node in child.get_children():
                 if "DiagnosisText" in str(node):
                     self.axis_status.append(node)
+
+        # Scan Types
+        self.scan_types = []
+        for child in client.get_node("ns=2;s=Application.MNDT_Vars.arScanTypes").get_children():
+            if child.get_data_type_as_variant_type() == ua.VariantType.String:
+                self.scan_types.append(child)

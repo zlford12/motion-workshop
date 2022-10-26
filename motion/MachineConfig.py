@@ -22,4 +22,8 @@ class MachineConfig:
             self.safety_devices.append(safety_device.text)
 
     def read_config_from_system(self, c: ConnectionManagement):
-        return
+        self.available_scan_types = []
+        for scan_type in c.node_list.scan_types:
+            self.available_scan_types.append(scan_type.get_value())
+
+        print(self.available_scan_types)
