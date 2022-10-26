@@ -1,4 +1,5 @@
 from tkinter import *
+from gui.scan_types.NoScan import NoScan
 from gui.scan_types.P2P import P2P
 from motion.Motion import Motion
 from utility.ConnectionManagement import ConnectionManagement
@@ -28,6 +29,7 @@ class ScanFrame:
 
         # Scan Types
         self.scan_types = {
+            "NoScan": NoScan,
             "P2P": P2P
         }
 
@@ -39,6 +41,20 @@ class ScanFrame:
         if self.selected_scan_mode is None:
             self.selected_scan_mode = self.motion.machine_config.default_scan_type
 
+        if not (self.selected_scan_mode in self.scan_types):
+            self.selected_scan_mode = "NoScan"
+
         self.scan_controls = \
             self.scan_types[self.selected_scan_mode](self.scan_frame, self.colors, self.connection_manager)
         self.scan_controls.draw_controls()
+
+    def update_scan_type(self):
+
+        for child in self.scan_frame.winfo_children():
+            child.destroy()
+
+        if self.connection_manager.is_connected():
+            index = self.connection_manager.node_list.selected_scan_type.get_value()
+            self.selected_scan_mode = self.motion.machine_config.available_scan_types[index]
+
+        self.draw()

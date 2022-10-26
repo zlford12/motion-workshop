@@ -108,6 +108,7 @@ class UserInterface:
                 self.header.draw()
                 self.control_tabs.offset_jog.draw()
                 self.jog_frame.draw()
+                self.scan_frame.update_scan_type()
 
             # On Disconnect From PLC
             if not self.connection_manager.is_connected() and \

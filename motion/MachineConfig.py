@@ -26,4 +26,10 @@ class MachineConfig:
         for scan_type in c.node_list.scan_types:
             self.available_scan_types.append(scan_type.get_value())
 
-        print(self.available_scan_types)
+        self.default_scan_type = self.available_scan_types[c.node_list.default_scan_type.get_value()]
+
+        self.safety_devices = []
+        for safety_device in c.node_list.safety_devices:
+            name = safety_device.get_value()
+            if name != "":
+                self.safety_devices.append(name)
