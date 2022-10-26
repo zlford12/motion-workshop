@@ -1,6 +1,7 @@
 from tkinter import *
 from gui.scan_types.NoScan import NoScan
 from gui.scan_types.P2P import P2P
+from gui.scan_types.Raster_3D import Raster3D
 from motion.Motion import Motion
 from utility.ConnectionManagement import ConnectionManagement
 from utility.ApplicationSettings import ApplicationSettings
@@ -30,6 +31,7 @@ class ScanFrame:
         # Scan Types
         self.scan_types = {
             "NoScan": NoScan,
+            "Raster_3D": Raster3D,
             "P2P": P2P
         }
 
