@@ -1,9 +1,10 @@
+from motion.Motion import Motion
 from tkinter import *
 from utility.ConnectionManagement import ConnectionManagement
 
 
 class NoScan:
-    def __init__(self, frame, colors, c: ConnectionManagement):
+    def __init__(self, frame, colors, c: ConnectionManagement, m: Motion):
         # Create Frames
         self.frame = frame
         self.colors = colors
@@ -11,6 +12,7 @@ class NoScan:
 
         # Connection Manager
         self.c = c
+        self.m = m
 
         # Create Widgets
         self.no_scan_label = Label(self.control_frame)

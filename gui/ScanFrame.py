@@ -47,7 +47,9 @@ class ScanFrame:
             self.selected_scan_mode = "NoScan"
 
         self.scan_controls = \
-            self.scan_types[self.selected_scan_mode](self.scan_frame, self.colors, self.connection_manager)
+            self.scan_types[self.selected_scan_mode](
+                self.scan_frame, self.colors, self.connection_manager, self.motion
+            )
         self.scan_controls.draw_controls()
 
     def update_scan_type(self):

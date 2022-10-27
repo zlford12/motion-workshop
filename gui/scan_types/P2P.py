@@ -1,3 +1,4 @@
+from motion.Motion import Motion
 import opcua
 from opcua import ua
 from tkinter import *
@@ -6,7 +7,7 @@ from utility.ConnectionManagement import ConnectionManagement
 
 
 class P2P:
-    def __init__(self, frame, colors, c: ConnectionManagement):
+    def __init__(self, frame, colors, c: ConnectionManagement, m: Motion):
         # Create Frames
         self.frame = frame
         self.colors = colors
@@ -15,6 +16,7 @@ class P2P:
 
         # Connection Manager
         self.c = c
+        self.m = m
 
         # Create Widgets
         self.start_button = Button(self.control_frame)
