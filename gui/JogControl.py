@@ -317,7 +317,10 @@ class JogControl:
         self.name_entry.delete(0, 'end')
         self.name_entry.insert(0, self.axis.axis_data.Name)
         self.velocity_entry.delete(0, 'end')
-        self.velocity_entry.insert(0, self.axis.axis_limits.SetVelocity / 60)
+        if self.axis.axis_data.Rotary:
+            self.velocity_entry.insert(0, self.axis.axis_limits.SetVelocity)
+        else:
+            self.velocity_entry.insert(0, self.axis.axis_limits.SetVelocity / 60)
         self.acceleration_entry.delete(0, 'end')
         self.acceleration_entry.insert(0, self.axis.axis_limits.SetAcceleration)
         self.deceleration_entry.delete(0, 'end')
@@ -417,10 +420,17 @@ class JogControl:
                     self.deceleration_entry.get() != str(self.axis.axis_limits.SetDeceleration):
 
                 if self.velocity_entry.get() == "":
-                    velocity_input = (self.axis.axis_limits.SetVelocity / 60.0)
+                    if self.axis.axis_data.Rotary:
+                        velocity_input = self.axis.axis_limits.SetVelocity
+                    else:
+                        velocity_input = (self.axis.axis_limits.SetVelocity / 60.0)
                 else:
-                    velocity_input = min(float(self.velocity_entry.get()),
-                                         self.axis.axis_limits.MaxVelocity / 60.0)
+                    if self.axis.axis_data.Rotary:
+                        velocity_input = min(float(self.velocity_entry.get()),
+                                             self.axis.axis_limits.MaxVelocity)
+                    else:
+                        velocity_input = min(float(self.velocity_entry.get()),
+                                             self.axis.axis_limits.MaxVelocity / 60.0)
 
                 if self.acceleration_entry.get() == "":
                     acceleration_input = self.axis.axis_limits.SetAcceleration
