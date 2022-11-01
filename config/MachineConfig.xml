@@ -30,8 +30,9 @@
       <Offset>True</Offset>
     </Axis>
   </AxisList>
-  <DefaultScanType>P2P</DefaultScanType>
+  <DefaultScanType>NoScan</DefaultScanType>
   <AvailableScanTypes>
+    <ScanType>NoScan</ScanType>
     <ScanType>P2P</ScanType>
   </AvailableScanTypes>
   <SafetyDevices>

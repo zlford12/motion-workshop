@@ -1,4 +1,5 @@
 from gui.menu_bar.ApplicationSettingsMenu import ApplicationSettingsMenu
+from gui.menu_bar.ChangeScanTypeMenu import ChangeScanTypeMenu
 from tkinter import *
 from motion.Motion import Motion
 from utility.ConnectionManagement import ConnectionManagement
@@ -25,6 +26,9 @@ class MenuBar:
         # Menu Objects
         self.application_settings_menu = ApplicationSettingsMenu(
             self.colors, self.root, self.application_settings
+        )
+        self.change_scan_type_menu = ChangeScanTypeMenu(
+            self.colors, self.root, self.motion, self.connection_manager
         )
 
     def draw(self):
@@ -55,7 +59,7 @@ class MenuBar:
         )
         system_menu.add_command(
             label="Change Scan Type",
-            command=self.dummy_function
+            command=self.change_scan_type_menu.open_selection
         )
 
         # Display Menus

@@ -71,3 +71,5 @@ class ApplicationSettingsMenu:
                 self.setting_entries[i].get()
 
         self.application_settings.write_xml()
+
+        self.window.destroy()

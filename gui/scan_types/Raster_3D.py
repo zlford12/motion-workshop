@@ -417,4 +417,6 @@ class Raster3D:
             .set_value(1, varianttype=ua.VariantType.Int16)
 
     def stop_scan(self):
-        return
+        # Stop Scan
+        self.c.client.get_node("ns=2;s=Application.Raster_3D_Vars.iRaster_3DCommand") \
+            .set_value(2, varianttype=ua.VariantType.Int16)

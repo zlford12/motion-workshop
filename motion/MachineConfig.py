@@ -6,6 +6,7 @@ class MachineConfig:
     def __init__(self, config_file):
         self.config_file = config_file
         self.default_scan_type = ""
+        self.selected_scan_type = ""
         self.available_scan_types = []
         self.safety_devices = []
 
@@ -27,6 +28,7 @@ class MachineConfig:
             self.available_scan_types.append(scan_type.get_value())
 
         self.default_scan_type = self.available_scan_types[c.node_list.default_scan_type.get_value()]
+        self.selected_scan_type = self.available_scan_types[c.node_list.selected_scan_type.get_value()]
 
         self.safety_devices = []
         for safety_device in c.node_list.safety_devices:

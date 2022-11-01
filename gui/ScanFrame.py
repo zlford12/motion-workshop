@@ -25,7 +25,7 @@ class ScanFrame:
         self.scan_frame = Frame(self.root)
 
         # Scan Frame Elements
-        self.selected_scan_mode = None
+        self.drawn_scan_type = ""
         self.scan_controls = None
 
         # Scan Types
@@ -40,25 +40,27 @@ class ScanFrame:
         self.scan_frame.configure(bg=self.colors[3])
         self.scan_frame.grid(row=1, column=2, rowspan=3, sticky=E + N + S)
 
-        if self.selected_scan_mode is None:
-            self.selected_scan_mode = self.motion.machine_config.default_scan_type
+        if self.motion.machine_config.selected_scan_type == "":
+            self.motion.machine_config.selected_scan_type = self.motion.machine_config.default_scan_type
 
-        if not (self.selected_scan_mode in self.scan_types):
-            self.selected_scan_mode = "NoScan"
+        self.drawn_scan_type = self.motion.machine_config.selected_scan_type
 
         self.scan_controls = \
-            self.scan_types[self.selected_scan_mode](
+            self.scan_types[self.motion.machine_config.selected_scan_type](
                 self.scan_frame, self.colors, self.connection_manager, self.motion
             )
         self.scan_controls.draw_controls()
 
     def update_scan_type(self):
-
-        for child in self.scan_frame.winfo_children():
-            child.destroy()
-
         if self.connection_manager.is_connected():
             index = self.connection_manager.node_list.selected_scan_type.get_value()
-            self.selected_scan_mode = self.motion.machine_config.available_scan_types[index]
+            self.motion.machine_config.selected_scan_type = self.motion.machine_config.available_scan_types[index]
 
-        self.draw()
+        if not (self.motion.machine_config.selected_scan_type in self.scan_types):
+            self.motion.machine_config.selected_scan_type = "NoScan"
+
+        if self.drawn_scan_type != self.motion.machine_config.selected_scan_type:
+            for child in self.scan_frame.winfo_children():
+                child.destroy()
+
+            self.draw()

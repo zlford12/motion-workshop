@@ -108,7 +108,6 @@ class UserInterface:
                 self.header.draw()
                 self.control_tabs.offset_jog.draw()
                 self.jog_frame.draw()
-                self.scan_frame.update_scan_type()
 
             # On Disconnect From PLC
             if not self.connection_manager.is_connected() and \
@@ -134,6 +133,9 @@ class UserInterface:
                 self.jog_frame.draw()
                 self.header.draw()
                 link_status_cache = self.motion.link_status
+
+            # Update Scan Type
+            self.scan_frame.update_scan_type()
 
             # Update Footer
             self.footer.loop_time_display.configure(text=str(self.last_update_loop_time)[0:4] + "s")

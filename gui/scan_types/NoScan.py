@@ -5,6 +5,7 @@ from utility.ConnectionManagement import ConnectionManagement
 
 class NoScan:
     def __init__(self, frame, colors, c: ConnectionManagement, m: Motion):
+
         # Create Frames
         self.frame = frame
         self.colors = colors
