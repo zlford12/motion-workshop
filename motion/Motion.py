@@ -63,11 +63,14 @@ class Motion:
                 axis.axis_data.Name = values[0]
                 axis.axis_data.Rotary = values[4]
                 axis.axis_data.Linkable = values[5]
-                axis.axis_data.Offset = values[6]
+                axis.axis_data.ScanAxis = values[6]
+                axis.axis_data.PropertyA = values[7]
+                axis.axis_data.PropertyB = values[8]
+                axis.axis_data.Offset = values[9]
                 axis.axis_data.Position = values[1]
                 axis.axis_data.Velocity = values[2]
                 axis.axis_data.Torque = values[3]
-                status_bits = values[7]
+                status_bits = values[10]
 
                 axis.axis_data.Error = status_bits & (1 << 0) != 0
                 axis.axis_data.Power = status_bits & (1 << 0) != 0

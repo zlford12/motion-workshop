@@ -4,6 +4,9 @@ class AxisData:
         self.AxisNo = 0
         self.Rotary = False
         self.Linkable = False
+        self.ScanAxis = False
+        self.PropertyA = False
+        self.PropertyB = False
         self.Offset = False
         self.Position = 0
         self.Velocity = 0
