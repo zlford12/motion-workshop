@@ -28,6 +28,9 @@ class Motion:
             axis.axis_data.AxisNo = axis_element.find("AxisNo").text
             axis.axis_data.Rotary = axis_element.find("Rotary").text == "True"
             axis.axis_data.Linkable = axis_element.find("Linkable").text == "True"
+            axis.axis_data.ScanAxis = axis_element.find("ScanAxis").text == "True"
+            axis.axis_data.PropertyA = axis_element.find("PropertyA").text == "True"
+            axis.axis_data.PropertyB = axis_element.find("PropertyB").text == "True"
             axis.axis_data.Offset = axis_element.find("Offset").text == "True"
             self.axis_list.append(axis)
 

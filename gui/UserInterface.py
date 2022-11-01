@@ -104,6 +104,7 @@ class UserInterface:
                 self.control_tabs.axis_status.create_status_labels()
 
                 # Update UI
+                self.motion.update(self.connection_manager)
                 self.footer.connection_status_display.configure(text="Connected")
                 self.header.draw()
                 self.control_tabs.offset_jog.draw()

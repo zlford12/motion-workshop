@@ -7,6 +7,9 @@
       <Rotary>False</Rotary>
       <Linkable>False</Linkable>
       <Offset>False</Offset>
+      <ScanAxis>False</ScanAxis>
+      <PropertyA>False</PropertyA>
+      <PropertyB>False</PropertyB>
     </Axis>
     <Axis>
       <Name>Y</Name>
@@ -14,6 +17,9 @@
       <Rotary>False</Rotary>
       <Linkable>False</Linkable>
       <Offset>False</Offset>
+      <ScanAxis>False</ScanAxis>
+      <PropertyA>False</PropertyA>
+      <PropertyB>False</PropertyB>
     </Axis>
     <Axis>
       <Name>Z</Name>
@@ -21,6 +27,9 @@
       <Rotary>False</Rotary>
       <Linkable>False</Linkable>
       <Offset>False</Offset>
+      <ScanAxis>False</ScanAxis>
+      <PropertyA>False</PropertyA>
+      <PropertyB>False</PropertyB>
     </Axis>
     <Axis>
       <Name>Offset</Name>
@@ -28,6 +37,9 @@
       <Rotary>False</Rotary>
       <Linkable>False</Linkable>
       <Offset>True</Offset>
+      <ScanAxis>False</ScanAxis>
+      <PropertyA>False</PropertyA>
+      <PropertyB>False</PropertyB>
     </Axis>
   </AxisList>
   <DefaultScanType>NoScan</DefaultScanType>
