@@ -20,8 +20,12 @@ class Raster3D:
         # Axes
         self.axes = self.m.axis_list
         self.axis_names = []
+        self.scan_axes = []
         for axis in self.axes:
-            self.axis_names.append(axis.axis_data.Name)
+            if not axis.axis_data.Offset and not axis.axis_data.Linkable and not axis.axis_data.ScanAxis:
+                self.axis_names.append(axis.axis_data.Name)
+            if axis.axis_data.ScanAxis:
+                self.scan_axes.append(axis.axis_data.Name)
 
         # Scan Points
         self.scan_points = [[0.0] * 3] * 50

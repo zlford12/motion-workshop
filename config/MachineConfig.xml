@@ -45,7 +45,9 @@
   <DefaultScanType>NoScan</DefaultScanType>
   <AvailableScanTypes>
     <ScanType>NoScan</ScanType>
+    <ScanType>Raster_3D</ScanType>
     <ScanType>P2P</ScanType>
+    <ScanType>Spline</ScanType>
   </AvailableScanTypes>
   <SafetyDevices>
     <SafetyDevice>Estop 1</SafetyDevice>
