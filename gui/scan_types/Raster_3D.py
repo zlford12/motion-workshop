@@ -47,8 +47,8 @@ class Raster3D:
         self.x_axis_menu = OptionMenu(self.control_frame, self.x_selection, *self.axis_names)
         self.y_axis_menu = OptionMenu(self.control_frame, self.y_selection, *self.axis_names)
         self.z_axis_menu = OptionMenu(self.control_frame, self.z_selection, *self.axis_names)
-        self.scan_axis_menu = OptionMenu(self.control_frame, self.scan_selection, *self.axis_names)
-        self.index_axis_menu = OptionMenu(self.control_frame, self.index_selection, *self.axis_names)
+        self.scan_axis_menu = OptionMenu(self.control_frame, self.scan_selection, *self.scan_axes)
+        self.index_axis_menu = OptionMenu(self.control_frame, self.index_selection, *self.scan_axes)
 
         self.scan_parameters_label = Label(self.control_frame)
         self.scan_speed_label = Label(self.control_frame)
