@@ -152,12 +152,12 @@ class Spline:
         )
 
         self.scan_button.configure(
-            text="Scan Mode", width=12, height=2, bg=self.colors[4],
-            command=self.start_scan
+            text="Enter\nScan Mode", width=12, height=2, bg=self.colors[4],
+            command=self.enter_scan_mode
         )
         self.go_to_scan_button.configure(
             text="Go To\nScan Position", width=12, height=2, bg=self.colors[4],
-            command=self.start_scan
+            command=self.go_to_spline
         )
         self.load_spline_button.configure(
             text="Load Spline", width=12, height=2, bg=self.colors[4],
@@ -233,13 +233,13 @@ class Spline:
         )
 
         self.scan_button.grid(
-            row=7, column=0, padx=5, pady=10
+            row=7, column=2, padx=5, pady=10
         )
         self.go_to_scan_button.grid(
             row=7, column=1, padx=5, pady=10
         )
         self.load_spline_button.grid(
-            row=7, column=2, padx=5, pady=10
+            row=7, column=0, padx=5, pady=10
         )
 
     def axis_number_from_name(self, name: str):
@@ -492,13 +492,11 @@ class Spline:
 
         self.c.client.get_node("ns=2;s=Application.Spline_Vars.S1bFlag").set_value(False)
 
-    def start_scan(self):
-        return
-
+    def enter_scan_mode(self):
         # Read Scan Parameter Node
         node_array: [opcua.Node] = []
         for child in self.c.client.get_node(
-            "ns=2;s=Application.Raster_3D_Vars.arRaster_3DValues"
+            "ns=2;s=Application.Spline_Vars.arSplineValues"
         ).get_children():
             if child.get_data_type_as_variant_type() == ua.VariantType.Double:
                 node_array.append(child)
@@ -507,11 +505,33 @@ class Spline:
         # Write Scan Parameters
         self.c.client.set_values(node_array, values_array)
 
-        # Start Scan
-        self.c.client.get_node("ns=2;s=Application.SplineVars.iSplineCommand") \
+        # Configure Button
+        self.scan_button.configure(
+            text="Exit\nScan Mode",
+            command=self.exit_scan_mode
+        )
+
+        # Enter Scan Mode
+        self.c.client.get_node("ns=2;s=Application.Spline_Vars.iSplineCommand") \
             .set_value(1, varianttype=ua.VariantType.Int16)
 
-    def stop_scan(self):
+    def exit_scan_mode(self):
+        self.scan_button.configure(
+            text="Enter\nScan Mode", width=12, height=2, bg=self.colors[4],
+            command=self.enter_scan_mode
+        )
+
+        # Configure Button
+        self.scan_button.configure(
+            text="Enter\nScan Mode",
+            command=self.enter_scan_mode
+        )
+
         # Stop Scan
-        self.c.client.get_node("ns=2;s=Application.Raster_3D_Vars.iRaster_3DCommand") \
+        self.c.client.get_node("ns=2;s=Application.Spline_Vars.iSplineCommand") \
             .set_value(2, varianttype=ua.VariantType.Int16)
+
+    def go_to_spline(self):
+        # Go To Spline
+        self.c.client.get_node("ns=2;s=Application.Spline_Vars.iSplineCommand") \
+            .set_value(4, varianttype=ua.VariantType.Int16)
