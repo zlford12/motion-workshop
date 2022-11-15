@@ -201,7 +201,7 @@ class JogControl:
             velocity_unit = "RPM"
             acceleration_unit = "rad/s^2"
         else:
-            velocity_unit = "mm/s"
+            velocity_unit = "mm/min"
             acceleration_unit = "mm/s^2"
 
         # Configure Frames
@@ -317,10 +317,7 @@ class JogControl:
         self.name_entry.delete(0, 'end')
         self.name_entry.insert(0, self.axis.axis_data.Name)
         self.velocity_entry.delete(0, 'end')
-        if self.axis.axis_data.Rotary:
-            self.velocity_entry.insert(0, self.axis.axis_limits.SetVelocity)
-        else:
-            self.velocity_entry.insert(0, self.axis.axis_limits.SetVelocity / 60)
+        self.velocity_entry.insert(0, self.axis.axis_limits.SetVelocity)
         self.acceleration_entry.delete(0, 'end')
         self.acceleration_entry.insert(0, self.axis.axis_limits.SetAcceleration)
         self.deceleration_entry.delete(0, 'end')
@@ -420,17 +417,10 @@ class JogControl:
                     self.deceleration_entry.get() != str(self.axis.axis_limits.SetDeceleration):
 
                 if self.velocity_entry.get() == "":
-                    if self.axis.axis_data.Rotary:
-                        velocity_input = self.axis.axis_limits.SetVelocity
-                    else:
-                        velocity_input = (self.axis.axis_limits.SetVelocity / 60.0)
+                    velocity_input = self.axis.axis_limits.SetVelocity
                 else:
-                    if self.axis.axis_data.Rotary:
-                        velocity_input = min(float(self.velocity_entry.get()),
-                                             self.axis.axis_limits.MaxVelocity)
-                    else:
-                        velocity_input = min(float(self.velocity_entry.get()),
-                                             self.axis.axis_limits.MaxVelocity / 60.0)
+                    velocity_input = min(float(self.velocity_entry.get()),
+                                         self.axis.axis_limits.MaxVelocity)
 
                 if self.acceleration_entry.get() == "":
                     acceleration_input = self.axis.axis_limits.SetAcceleration

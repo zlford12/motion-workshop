@@ -79,7 +79,7 @@ class P2P:
             width=entry_width
         )
         self.linear_velocity_unit.configure(
-            text="mm/s", bg=self.colors[3], font=label_font, justify=LEFT
+            text="mm/min", bg=self.colors[3], font=label_font, justify=LEFT
         )
         self.rotary_velocity_label.configure(
             text="Rotary Velocity", bg=self.colors[3], font=label_font, justify=LEFT
