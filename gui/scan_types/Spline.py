@@ -23,6 +23,7 @@ class Spline:
         self.axes = self.m.axis_list
         self.axis_names = ["None"]
         self.scan_axes = ["None"]
+        self.selected_axes: [str] = []
         for axis in self.axes:
             if not axis.axis_data.Offset and not axis.axis_data.Linkable and not axis.axis_data.ScanAxis:
                 self.axis_names.append(axis.axis_data.Name)
@@ -80,6 +81,9 @@ class Spline:
         self.scan_button = Button(self.control_frame)
         self.go_to_scan_button = Button(self.control_frame)
         self.load_spline_button = Button(self.control_frame)
+        self.forward_button = Button(self.control_frame)
+        self.reverse_button = Button(self.control_frame)
+        self.stop_button = Button(self.control_frame)
 
     def configure(self):
         # Configure Frame
@@ -163,6 +167,18 @@ class Spline:
             text="Load Spline", width=12, height=2, bg=self.colors[4],
             command=self.load_spline
         )
+        self.forward_button.configure(
+            text="Spline Scan\nForward", width=12, height=2, bg=self.colors[4],
+            command=self.spline_scan_forward
+        )
+        self.reverse_button.configure(
+            text="Spline Scan\nReverse", width=12, height=2, bg=self.colors[4],
+            command=self.spline_scan_reverse
+        )
+        self.stop_button.configure(
+            text="Stop\nSpline Scan", width=12, height=2, bg=self.colors[4],
+            command=self.spline_scan_stop
+        )
 
     def draw_controls(self):
         # Configure Widgets
@@ -240,6 +256,15 @@ class Spline:
         )
         self.load_spline_button.grid(
             row=7, column=0, padx=5, pady=10
+        )
+        self.forward_button.grid(
+            row=8, column=0, padx=5
+        )
+        self.reverse_button.grid(
+            row=8, column=1, padx=5
+        )
+        self.stop_button.grid(
+            row=8, column=2, padx=5
         )
 
     def axis_number_from_name(self, name: str):
@@ -524,13 +549,55 @@ class Spline:
         self.c.client.get_node("ns=2;s=Application.Spline_Vars.iSplineCommand") \
             .set_value(4, varianttype=ua.VariantType.Int16)
 
+    def set_spline_axes(self):
+        current_selection = \
+            [
+                self.x_selection.get(),
+                self.y_selection.get(),
+                self.z_selection.get(),
+                self.gx_selection.get(),
+                self.gy_selection.get(),
+                self.gz_selection.get(),
+                self.scan_selection.get(),
+                self.index_selection.get(),
+                self.path_selection.get()
+            ]
+
+        if current_selection != self.selected_axes:
+            self.selected_axes = current_selection
+
+            axis_numbers: [int] = []
+            for name in current_selection:
+                axis_numbers.append(self.axis_number_from_name(name))
+
+            self.c.client.get_node("ns=2;s=Application.Spline_Vars.arSplineValues")\
+                .set_value(axis_numbers, varianttype=ua.VariantType.Double)
+
+            self.c.client.get_node("ns=2;s=Application.Spline_Vars.iSplineCommand")\
+                .set_value(7, varianttype=ua.VariantType.Int16)
+
+    def spline_scan_forward(self):
+        self.c.client.get_node("ns=2;s=Application.Spline_Vars.iSplineCommand")\
+            .set_value(9, varianttype=ua.VariantType.Int16)
+
+    def spline_scan_reverse(self):
+        self.c.client.get_node("ns=2;s=Application.Spline_Vars.iSplineCommand")\
+            .set_value(10, varianttype=ua.VariantType.Int16)
+
+    def spline_scan_stop(self):
+        self.c.client.get_node("ns=2;s=Application.Spline_Vars.iSplineCommand")\
+            .set_value(11, varianttype=ua.VariantType.Int16)
+
     def update(self):
+        # Set Spline Axes
+        self.set_spline_axes()
+
         # Check Spline Scan Status
         if self.c.is_connected():
             in_scan_mode = self.c.client.get_node("ns=2;s=Application.Spline_Vars.arSplineOutputs[0]").get_value()
             part_in_range = self.c.client.get_node("ns=2;s=Application.Spline_Vars.arSplineOutputs[1]").get_value()
             scan_mode_failure = self.c.client.get_node("ns=2;s=Application.Spline_Vars.arSplineOutputs[2]").get_value()
-            spline_axes_set = True
+            spline_axes_set = self.c.client.get_node("ns=2;s=Application.Spline_Vars.arSplineOutputs[3]").get_value()
         else:
             in_scan_mode = False
             part_in_range = False
@@ -566,6 +633,16 @@ class Spline:
             self.load_spline_button["state"] = "normal"
         else:
             self.load_spline_button["state"] = "disable"
+
+        # Disable Scan Controls
+        if in_scan_mode and self.spline_loaded:
+            self.forward_button["state"] = "normal"
+            self.reverse_button["state"] = "normal"
+            self.stop_button["state"] = "normal"
+        else:
+            self.forward_button["state"] = "disable"
+            self.reverse_button["state"] = "disable"
+            self.stop_button["state"] = "disable"
 
         # Scan Mode Failure
         if scan_mode_failure:
