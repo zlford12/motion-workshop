@@ -505,12 +505,6 @@ class Spline:
         # Write Scan Parameters
         self.c.client.set_values(node_array, values_array)
 
-        # Configure Button
-        self.scan_button.configure(
-            text="Exit\nScan Mode",
-            command=self.exit_scan_mode
-        )
-
         # Enter Scan Mode
         self.c.client.get_node("ns=2;s=Application.Spline_Vars.iSplineCommand") \
             .set_value(1, varianttype=ua.VariantType.Int16)
@@ -518,12 +512,6 @@ class Spline:
     def exit_scan_mode(self):
         self.scan_button.configure(
             text="Enter\nScan Mode", width=12, height=2, bg=self.colors[4],
-            command=self.enter_scan_mode
-        )
-
-        # Configure Button
-        self.scan_button.configure(
-            text="Enter\nScan Mode",
             command=self.enter_scan_mode
         )
 
@@ -535,3 +523,55 @@ class Spline:
         # Go To Spline
         self.c.client.get_node("ns=2;s=Application.Spline_Vars.iSplineCommand") \
             .set_value(4, varianttype=ua.VariantType.Int16)
+
+    def update(self):
+        # Check Spline Scan Status
+        if self.c.is_connected():
+            in_scan_mode = self.c.client.get_node("ns=2;s=Application.Spline_Vars.arSplineOutputs[0]").get_value()
+            part_in_range = self.c.client.get_node("ns=2;s=Application.Spline_Vars.arSplineOutputs[1]").get_value()
+            scan_mode_failure = self.c.client.get_node("ns=2;s=Application.Spline_Vars.arSplineOutputs[2]").get_value()
+            spline_axes_set = True
+        else:
+            in_scan_mode = False
+            part_in_range = False
+            scan_mode_failure = False
+            spline_axes_set = False
+
+        # Configure Scan Button
+        if (self.scan_button["text"] == "Enter\nScan Mode") and in_scan_mode:
+            self.scan_button.configure(
+                text="Exit\nScan Mode",
+                command=self.exit_scan_mode
+            )
+        elif (self.scan_button["text"] == "Exit\nScan Mode") and not in_scan_mode:
+            self.scan_button.configure(
+                text="Enter\nScan Mode",
+                command=self.enter_scan_mode
+            )
+
+        # Disable Scan Button
+        if in_scan_mode or (part_in_range and spline_axes_set and self.spline_loaded):
+            self.scan_button["state"] = "normal"
+        else:
+            self.scan_button["state"] = "disable"
+
+        # Disable Go To Scan Button
+        if not in_scan_mode and not part_in_range and spline_axes_set and self.spline_loaded:
+            self.go_to_scan_button["state"] = "normal"
+        else:
+            self.go_to_scan_button["state"] = "disable"
+
+        # Disable Load Spline Button
+        if spline_axes_set and not in_scan_mode:
+            self.load_spline_button["state"] = "normal"
+        else:
+            self.load_spline_button["state"] = "disable"
+
+        # Scan Mode Failure
+        if scan_mode_failure:
+            self.c.client.get_node("ns=2;s=Application.Spline_Vars.iSplineCommand").set_value(
+                8, varianttype=ua.VariantType.Int16
+            )
+            messagebox.showerror(
+                title="Scan Mode Failure", message="Failed To Enter Scan Mode"
+            )

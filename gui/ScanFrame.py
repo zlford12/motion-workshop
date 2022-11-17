@@ -66,3 +66,6 @@ class ScanFrame:
                 child.destroy()
 
             self.draw()
+
+        if hasattr(self.scan_controls, "update") and callable(self.scan_controls.update):
+            self.scan_controls.update()
