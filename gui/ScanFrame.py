@@ -2,6 +2,7 @@ from tkinter import *
 from gui.scan_types.NoScan import NoScan
 from gui.scan_types.P2P import P2P
 from gui.scan_types.Raster_3D import Raster3D
+from gui.scan_types.Shaft import Shaft
 from gui.scan_types.Spline import Spline
 from motion.Motion import Motion
 from utility.ConnectionManagement import ConnectionManagement
@@ -34,7 +35,8 @@ class ScanFrame:
             "NoScan": NoScan,
             "Raster_3D": Raster3D,
             "P2P": P2P,
-            "Spline": Spline
+            "Spline": Spline,
+            "Shaft": Shaft
         }
 
     def draw(self):
