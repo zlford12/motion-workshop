@@ -12,6 +12,7 @@ class ConnectionManagement:
         self.error = False
         self.error_message = ""
         self.node_list = NodeList()
+        self.ip = "127.0.0.1"
 
     def is_connected(self):
         if self.connection_desired:
@@ -35,6 +36,7 @@ class ConnectionManagement:
                 self.client = Client("opc.tcp://" + ip + ":4840", timeout=3)
                 self.client.connect()
                 self.node_list.get_nodes(self.client)
+                self.ip = ip
         except Exception as e:
             self.connection_desired = False
             self.error = True
