@@ -1,4 +1,6 @@
 import ftplib
+import struct
+
 from motion.Motion import Motion
 import opcua
 from opcua import ua
@@ -143,7 +145,7 @@ class Mesh:
             command=self.go_to_mesh
         )
         self.load_mesh_button.configure(
-            text="Load Spline", width=12, height=2, bg=self.colors[4],
+            text="Load Mesh", width=12, height=2, bg=self.colors[4],
             command=self.load_mesh
         )
 
@@ -239,12 +241,66 @@ class Mesh:
 
     def load_mesh(self):
 
+        # Select Mesh File
         self.mesh_file = filedialog.askopenfilename()
         if self.mesh_file == "":
             return
 
-        ftp = ftplib.FTP(self.c.client)
-        self.mesh_loaded = True
+        # Read Scan Parameter Node
+        node_array: [opcua.Node] = []
+        for child in self.c.client.get_node(
+                "ns=2;s=Application.Mesh_Vars.arMeshValues"
+        ).get_children():
+            if child.get_data_type_as_variant_type() == ua.VariantType.Double:
+                node_array.append(child)
+        values_array: [float] = [float(0)] * len(node_array)
 
-        # Send Mesh To PLC
+        # Set Mesh Parameters
+        parameters = open(self.mesh_file, "rb").read(20)
+        values_array[0] = struct.unpack('f', parameters[0:4])[0]
+        values_array[1] = struct.unpack('f', parameters[4:8])[0]
+        values_array[2] = struct.unpack('f', parameters[8:12])[0]
+        values_array[3] = self.axis_number_from_name(self.x_selection.get())
+        values_array[4] = self.axis_number_from_name(self.y_selection.get())
+        values_array[5] = self.axis_number_from_name(self.z_selection.get())
+        values_array[6] = self.axis_number_from_name(self.gx_selection.get())
+        values_array[7] = self.axis_number_from_name(self.gy_selection.get())
+        values_array[8] = self.axis_number_from_name(self.gz_selection.get())
+        values_array[9] = self.axis_number_from_name(self.scan_selection.get())
+        values_array[10] = self.axis_number_from_name(self.index_selection.get())
 
+        # Write Scan Parameters
+        self.c.client.set_values(node_array, values_array)
+
+        self.c.client.get_node("ns=2;s=Application.Mesh_Vars.iMeshCommand") \
+            .set_value(3, varianttype=ua.VariantType.Int16)
+
+        # Upload Mesh File
+        ftp = ftplib.FTP(self.c.ip)
+        ftp.login("MNDT", "1bmhkchMNDT")
+        ftp.cwd("ata0b")
+        ftp.storbinary("STOR mesh_data", open(self.mesh_file, "rb"))
+
+        # Load Mesh File In PLC
+        self.c.client.get_node("ns=2;s=Application.Mesh_Vars.iMeshCommand") \
+            .set_value(4, varianttype=ua.VariantType.Int16)
+
+    def enter_scan_mode(self):
+        # Enter Scan Mode
+        self.c.client.get_node("ns=2;s=Application.Mesh_Vars.iMeshCommand") \
+            .set_value(1, varianttype=ua.VariantType.Int16)
+
+    def exit_scan_mode(self):
+        self.scan_button.configure(
+            text="Enter\nScan Mode", width=12, height=2, bg=self.colors[4],
+            command=self.enter_scan_mode
+        )
+
+        # Stop Scan
+        self.c.client.get_node("ns=2;s=Application.Mesh_Vars.iMeshCommand") \
+            .set_value(2, varianttype=ua.VariantType.Int16)
+
+    def go_to_mesh(self):
+        # Go To Mesh
+        self.c.client.get_node("ns=2;s=Application.Mesh_Vars.iMeshCommand") \
+            .set_value(5, varianttype=ua.VariantType.Int16)

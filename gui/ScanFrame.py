@@ -1,4 +1,5 @@
 from tkinter import *
+from gui.scan_types.Mesh import Mesh
 from gui.scan_types.NoScan import NoScan
 from gui.scan_types.P2P import P2P
 from gui.scan_types.Raster_3D import Raster3D
@@ -36,7 +37,8 @@ class ScanFrame:
             "Raster_3D": Raster3D,
             "P2P": P2P,
             "Spline": Spline,
-            "Shaft": Shaft
+            "Shaft": Shaft,
+            "Mesh": Mesh
         }
 
     def draw(self):
