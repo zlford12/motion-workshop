@@ -1,3 +1,4 @@
+import tkinter
 from tkinter import *
 from opcua import ua
 from motion.Motion import Motion
@@ -51,6 +52,7 @@ class JogControl:
         self.deceleration_entry = Entry(self.subframe)
         self.deceleration_unit = Label(self.subframe)
 
+    # noinspection PyTypeChecker
     def configure_controls(self):
         # Unit
         if self.axis.axis_data.Rotary:
@@ -70,11 +72,13 @@ class JogControl:
         self.settings_canvas.grid_propagate(False)
 
         # Configure Widgets
+        pixel = tkinter.PhotoImage(width=1, height=1)
+
         self.jog_negative_button.configure(
-            text="<<", width=2, height=4, bg=self.colors[3]
+            image=pixel, text="<<", width=20, height=75, compound="c", bg=self.colors[3]
         )
         self.jog_negative_slow_button.configure(
-            text="<", width=2, height=4, bg=self.colors[3]
+            image=pixel, text="<", width=20, height=75, compound="c", bg=self.colors[3]
         )
         self.axis_position_label.configure(
             text=self.axis.axis_data.Name + " \n" +
@@ -85,13 +89,13 @@ class JogControl:
             width=10, bg=self.colors[3]
         )
         self.go_to_button.configure(
-            text="Go To", width=5, height=1, bg=self.colors[3], command=self.go_to
+            image=pixel, text="Go To", width=50, height=20, compound="c", bg=self.colors[3], command=self.go_to
         )
         self.jog_positive_slow_button.configure(
-            text=">", width=2, height=4, bg=self.colors[3]
+            image=pixel, text=">", width=20, height=75, compound="c", bg=self.colors[3]
         )
         self.jog_positive_button.configure(
-            text=">>", width=2, height=4, bg=self.colors[3]
+            image=pixel, text=">>", width=20, height=75, compound="c", bg=self.colors[3]
         )
 
         # Bind Widgets
