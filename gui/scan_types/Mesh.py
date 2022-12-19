@@ -1,6 +1,6 @@
+import csv
 import ftplib
 import struct
-
 from motion.Motion import Motion
 import opcua
 from opcua import ua
@@ -71,6 +71,7 @@ class Mesh:
         self.scan_button = Button(self.control_frame)
         self.go_to_mesh_button = Button(self.control_frame)
         self.load_mesh_button = Button(self.control_frame)
+        self.create_mesh_button = Button(self.control_frame)
 
     def configure(self):
         # Configure Frame
@@ -148,6 +149,10 @@ class Mesh:
             text="Load Mesh", width=12, height=2, bg=self.colors[4],
             command=self.load_mesh
         )
+        self.create_mesh_button.configure(
+            text="Create Mesh\nFrom CSV", width=12, height=2, bg=self.colors[4],
+            command=self.create_mesh_from_csv
+        )
 
     def draw_controls(self):
         # Configure Widgets
@@ -219,6 +224,9 @@ class Mesh:
         )
         self.load_mesh_button.grid(
             row=7, column=0, padx=5, pady=10
+        )
+        self.create_mesh_button.grid(
+            row=8, column=0, padx=5, pady=10
         )
 
     def axis_number_from_name(self, name: str):
@@ -304,3 +312,11 @@ class Mesh:
         # Go To Mesh
         self.c.client.get_node("ns=2;s=Application.Mesh_Vars.iMeshCommand") \
             .set_value(5, varianttype=ua.VariantType.Int16)
+
+    def create_mesh_from_csv(self):
+        csv_file = filedialog.askopenfilename()
+        points = csv.reader(open(csv_file))
+
+        for row in points:
+            if row[0] != "Scan":
+                print(row)
