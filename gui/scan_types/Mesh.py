@@ -22,7 +22,6 @@ class Mesh:
         self.m = m
 
         # Mesh
-        self.mesh_file = ""
         self.mesh_loaded = True
 
         # Axes
@@ -250,8 +249,8 @@ class Mesh:
     def load_mesh(self):
 
         # Select Mesh File
-        self.mesh_file = filedialog.askopenfilename()
-        if self.mesh_file == "":
+        mesh_file = filedialog.askopenfilename()
+        if mesh_file == "":
             return
 
         # Read Scan Parameter Node
@@ -264,7 +263,7 @@ class Mesh:
         values_array: [float] = [float(0)] * len(node_array)
 
         # Set Mesh Parameters
-        parameters = open(self.mesh_file, "rb").read(20)
+        parameters = open(mesh_file, "rb").read(20)
         values_array[0] = struct.unpack('f', parameters[0:4])[0]
         values_array[1] = struct.unpack('f', parameters[4:8])[0]
         values_array[2] = struct.unpack('f', parameters[8:12])[0]
@@ -287,7 +286,7 @@ class Mesh:
         ftp = ftplib.FTP(self.c.ip)
         ftp.login("MNDT", "1bmhkchMNDT")
         ftp.cwd("ata0b")
-        ftp.storbinary("STOR mesh_data", open(self.mesh_file, "rb"))
+        ftp.storbinary("STOR mesh_data", open(mesh_file, "rb"))
 
         # Load Mesh File In PLC
         self.c.client.get_node("ns=2;s=Application.Mesh_Vars.iMeshCommand") \
@@ -313,10 +312,54 @@ class Mesh:
         self.c.client.get_node("ns=2;s=Application.Mesh_Vars.iMeshCommand") \
             .set_value(5, varianttype=ua.VariantType.Int16)
 
-    def create_mesh_from_csv(self):
+    @staticmethod
+    def create_mesh_from_csv():
         csv_file = filedialog.askopenfilename()
-        points = csv.reader(open(csv_file))
+        points_reader = csv.reader(open(csv_file))
+        points = []
+        mesh_file = "./mesh_data"
+        mesh = open(mesh_file, "wb")
 
-        for row in points:
+        # Create Point Cloud Array
+        for row in points_reader:
             if row[0] != "Scan":
-                print(row)
+                points.append(row)
+
+        # Determine Point Cloud Dimensions
+        mesh_resolution = float(points[1][0]) - float(points[0][0])
+        index_start = points[0][1]
+        scan_dimension = 1
+        index_dimension = 1
+
+        for i in range(len(points)):
+            if points[i][1] != index_start:
+                scan_dimension = i
+                if (len(points) % scan_dimension) == 0:
+                    index_dimension = len(points) / scan_dimension
+                    break
+                else:
+                    messagebox.showerror(
+                        title="File Error",
+                        message="Scan Lines Must Be Uniform In Length"
+                    )
+                    return
+
+        # Write Parameters
+        mesh.write(struct.pack('f', float(scan_dimension)))
+        mesh.write(struct.pack('f', float(index_dimension)))
+        mesh.write(struct.pack('f', float(mesh_resolution)))
+        mesh.write(struct.pack('f', 0.0))
+        mesh.write(struct.pack('f', 0.0))
+        mesh.write(struct.pack('f', 0.0))
+        mesh.write(struct.pack('f', 0.0))
+        mesh.write(struct.pack('f', 0.0))
+
+        # Write Point Cloud
+        for i in range(len(points)):
+            mesh.write(struct.pack('f', float(points[i][2])))
+            mesh.write(struct.pack('f', float(points[i][3])))
+            mesh.write(struct.pack('f', float(points[i][4])))
+            mesh.write(struct.pack('f', float(points[i][6])))
+            mesh.write(struct.pack('f', 0.0))
+            mesh.write(struct.pack('f', float(points[i][5])))
+            mesh.write(struct.pack('b', True))

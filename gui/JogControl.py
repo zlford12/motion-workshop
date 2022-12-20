@@ -327,6 +327,7 @@ class JogControl:
         self.deceleration_entry.delete(0, 'end')
         self.deceleration_entry.insert(0, self.axis.axis_limits.SetDeceleration)
 
+    # noinspection PyTypeChecker
     def jog_positive(self, button_state, speed: int):
         if self.connection_manager.is_connected():
             client = self.connection_manager.client
@@ -338,6 +339,20 @@ class JogControl:
                 "ns=2;s=Application.MNDT_Vars.arJogPositive[" + str(i) + "]"
             ).set_value(button_state)
 
+        pixel = tkinter.PhotoImage(width=1, height=1)
+
+        if speed == 1:
+            if button_state:
+                self.jog_positive_slow_button.configure(image=pixel, compound="c", bg=self.colors[4])
+            else:
+                self.jog_positive_slow_button.configure(image=pixel, compound="c", bg=self.colors[3])
+        else:
+            if button_state:
+                self.jog_positive_button.configure(image=pixel, compound="c", bg=self.colors[4])
+            else:
+                self.jog_positive_button.configure(image=pixel, compound="c", bg=self.colors[3])
+
+    # noinspection PyTypeChecker
     def jog_negative(self, button_state, speed: int):
         if self.connection_manager.is_connected():
             client = self.connection_manager.client
@@ -348,6 +363,19 @@ class JogControl:
             client.get_node(
                 "ns=2;s=Application.MNDT_Vars.arJogNegative[" + str(i) + "]"
             ).set_value(button_state)
+
+        pixel = tkinter.PhotoImage(width=1, height=1)
+
+        if speed == 1:
+            if button_state:
+                self.jog_negative_slow_button.configure(image=pixel, compound="c", bg=self.colors[4])
+            else:
+                self.jog_negative_slow_button.configure(image=pixel, compound="c", bg=self.colors[3])
+        else:
+            if button_state:
+                self.jog_negative_button.configure(image=pixel, compound="c", bg=self.colors[4])
+            else:
+                self.jog_negative_button.configure(image=pixel, compound="c", bg=self.colors[3])
 
     def go_to(self):
         if self.connection_manager.is_connected():
