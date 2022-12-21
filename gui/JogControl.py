@@ -89,7 +89,7 @@ class JogControl:
             width=10, bg=self.colors[3]
         )
         self.go_to_button.configure(
-            image=pixel, text="Go To", width=50, height=20, compound="c", bg=self.colors[3], command=self.go_to
+            text="Go To", width=5, height=1, bg=self.colors[3], command=self.go_to
         )
         self.jog_positive_slow_button.configure(
             image=pixel, text=">", width=20, height=75, compound="c", bg=self.colors[3]
