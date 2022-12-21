@@ -282,6 +282,11 @@ class Mesh:
         self.c.client.get_node("ns=2;s=Application.Mesh_Vars.iMeshCommand") \
             .set_value(3, varianttype=ua.VariantType.Int16)
 
+        # Wait For File To Be Unloaded
+        file_loaded = self.c.client.get_node("ns=2;s=Application.Mesh_Vars.arMeshOutputs[2]").get_value()
+        while file_loaded:
+            file_loaded = self.c.client.get_node("ns=2;s=Application.Mesh_Vars.arMeshOutputs[2]").get_value()
+
         # Upload Mesh File
         ftp = ftplib.FTP(self.c.ip)
         ftp.login("MNDT", "1bmhkchMNDT")
@@ -313,7 +318,32 @@ class Mesh:
             .set_value(5, varianttype=ua.VariantType.Int16)
 
     @staticmethod
-    def create_mesh_from_csv():
+    def trim_scan_lines(points: [[str]]):
+        trim = points
+        smallest_scan_line = len(trim)
+        current_scan_line_start = 0
+        trash_values = []
+
+        for i in range(len(trim)):
+            if float(trim[i][1]) != float(trim[current_scan_line_start][1]):
+                if (i - current_scan_line_start) < smallest_scan_line:
+                    smallest_scan_line = (i - current_scan_line_start)
+                current_scan_line_start = i
+
+        current_scan_line_start = 0
+        for i in range(len(trim)):
+            if float(trim[i][1]) != float(trim[current_scan_line_start][1]):
+                current_scan_line_start = i
+
+            if (i + 1 - current_scan_line_start) > smallest_scan_line:
+                trash_values.append(trim[i])
+
+        for value in trash_values:
+            trim.remove(value)
+
+        return trim
+
+    def create_mesh_from_csv(self):
         csv_file = filedialog.askopenfilename(filetypes=[("CSV File", "*.csv")])
         if ".csv" not in csv_file:
             messagebox.showerror(
@@ -337,6 +367,9 @@ class Mesh:
         for row in points_reader:
             if row[0] != "Scan":
                 points.append(row)
+
+        # Trim Scan Lines
+        points = self.trim_scan_lines(points)
 
         # Determine Point Cloud Dimensions
         mesh_resolution = float(points[1][0]) - float(points[0][0])
