@@ -249,7 +249,7 @@ class Mesh:
     def load_mesh(self):
 
         # Select Mesh File
-        mesh_file = filedialog.askopenfilename()
+        mesh_file = filedialog.askopenfilename(filetypes=[("Mesh File", "*.mesh")])
         if mesh_file == "":
             return
 
@@ -314,13 +314,26 @@ class Mesh:
 
     @staticmethod
     def create_mesh_from_csv():
-        csv_file = filedialog.askopenfilename()
+        csv_file = filedialog.askopenfilename(filetypes=[("CSV File", "*.csv")])
+        if ".csv" not in csv_file:
+            messagebox.showerror(
+                title="File Error",
+                message="CSV File Invalid"
+            )
+            return
         points_reader = csv.reader(open(csv_file))
-        points = []
-        mesh_file = "./mesh_data"
+
+        mesh_file = filedialog.asksaveasfilename(filetypes=[("Mesh File", "*.mesh")], defaultextension=".mesh")
+        if ".mesh" not in mesh_file:
+            messagebox.showerror(
+                title="File Error",
+                message="Mesh File Invalid"
+            )
+            return
         mesh = open(mesh_file, "wb")
 
         # Create Point Cloud Array
+        points = []
         for row in points_reader:
             if row[0] != "Scan":
                 points.append(row)
