@@ -28,7 +28,6 @@ class Mesh:
         self.axes = self.m.axis_list
         self.axis_names = ["None"]
         self.scan_axes = ["None"]
-        self.selected_axes: [str] = []
         for axis in self.axes:
             if not axis.axis_data.Offset and not axis.axis_data.Linkable and not axis.axis_data.ScanAxis:
                 self.axis_names.append(axis.axis_data.Name)
