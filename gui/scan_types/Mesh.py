@@ -288,9 +288,36 @@ class Mesh:
 
         # Upload Mesh File
         ftp = ftplib.FTP(self.c.ip)
-        ftp.login("MNDT", "1bmhkchMNDT")
-        ftp.cwd("ata0b")
-        ftp.storbinary("STOR mesh_data", open(mesh_file, "rb"))
+        try:
+            ftp.login("MNDT", "1bmhkchMNDT")
+        except Exception as e:
+            print(e)
+            messagebox.showerror(
+                title="FTP Error",
+                message="Invalid Credentials"
+            )
+            return
+
+        if "ata0b" in ftp.nlst():
+            ftp.cwd("ata0b")
+        elif "USER" in ftp.nlst():
+            ftp.cwd("USER")
+        else:
+            messagebox.showerror(
+                title="FTP Error",
+                message="Directory Does Not Exist"
+            )
+            return
+
+        try:
+            ftp.storbinary("STOR mesh_data", open(mesh_file, "rb"))
+        except Exception as e:
+            print(e)
+            messagebox.showerror(
+                title="FTP Error",
+                message="Failed To Write Mesh File"
+            )
+            return
 
         # Load Mesh File In PLC
         self.c.client.get_node("ns=2;s=Application.Mesh_Vars.iMeshCommand") \
