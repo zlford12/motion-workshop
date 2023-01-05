@@ -1,3 +1,6 @@
+from math import atan, degrees
+
+
 class Point:
     def __init__(self):
         self.X = 0.0
@@ -17,6 +20,19 @@ def generate_mesh():
 
     def y(x):
         return (a * pow(x, 3)) + (b * pow(x, 2)) + (c * pow(x, 1)) + d
+
+    def gz(p: Point):
+        slope = 0
+        coefficients = [d, c, b, a]
+        intercept = coefficients[0]
+        x = p.X
+
+        for j, coefficient in enumerate(coefficients):
+            if j != 0:
+                slope = slope + (coefficient * j * pow(x, j - 1))
+                intercept = intercept + (coefficient * pow(x, j))
+
+        return degrees(atan(slope))
 
     # Mesh Generation Parameters
     x_start = 0.0
@@ -68,7 +84,7 @@ def generate_mesh():
             current_line[i].Z = z_calc
 
     for point in mesh_points:
-        print(point.X, point.Y, point.Z)
+        print(gz(point))
 
 
 generate_mesh()
