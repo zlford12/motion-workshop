@@ -7,6 +7,7 @@ from opcua import ua
 from tkinter import *
 from tkinter import filedialog, messagebox
 from utility.ConnectionManagement import ConnectionManagement
+from utility.MeshGeneration import generate_mesh
 
 
 class Mesh:
@@ -70,6 +71,7 @@ class Mesh:
         self.go_to_mesh_button = Button(self.control_frame)
         self.load_mesh_button = Button(self.control_frame)
         self.create_mesh_button = Button(self.control_frame)
+        self.generate_mesh_button = Button(self.control_frame)
 
     def configure(self):
         # Configure Frame
@@ -151,6 +153,10 @@ class Mesh:
             text="Create Mesh\nFrom CSV", width=12, height=2, bg=self.colors[4],
             command=self.create_mesh_from_csv
         )
+        self.generate_mesh_button.configure(
+            text="Generate Mesh", width=12, height=2, bg=self.colors[4],
+            command=generate_mesh()
+        )
 
     def draw_controls(self):
         # Configure Widgets
@@ -225,6 +231,9 @@ class Mesh:
         )
         self.create_mesh_button.grid(
             row=8, column=0, padx=5, pady=10
+        )
+        self.generate_mesh_button.grid(
+            row=9, column=0, padx=5, pady=10
         )
 
     def axis_number_from_name(self, name: str):
