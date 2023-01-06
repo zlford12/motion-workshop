@@ -444,3 +444,5 @@ class Mesh:
             mesh.write(struct.pack('f', 0.0))
             mesh.write(struct.pack('f', float(points[i][5])))
             mesh.write(struct.pack('b', True))
+
+        mesh.close()

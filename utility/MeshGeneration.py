@@ -1,4 +1,6 @@
 from math import atan, degrees
+import struct
+from tkinter import filedialog, messagebox
 
 
 class Point:
@@ -70,6 +72,8 @@ def generate_mesh():
     # Copy First Line In Z Direction
     mesh_points: [Point] = []
     current_line = first_line
+    scan_dimension = len(first_line)
+    index_dimension = 0
 
     while z_calc <= z_stop:
         for point in current_line:
@@ -78,13 +82,47 @@ def generate_mesh():
             current_point.Y = point.Y
             current_point.Z = point.Z
             mesh_points.append(current_point)
+            index_dimension = index_dimension + 1
         z_calc = z_calc + z_resolution
 
         for i in range(len(current_line)):
             current_line[i].Z = z_calc
 
+    # Calculate Normals
     for point in mesh_points:
-        print(gz(point))
+        point.Gz = gz(point)
+
+    # Create Mesh File
+    mesh_file = filedialog.asksaveasfilename(filetypes=[("Mesh File", "*.mesh")], defaultextension=".mesh")
+    if ".mesh" not in mesh_file:
+        messagebox.showerror(
+            title="File Error",
+            message="Mesh File Invalid"
+        )
+        return
+    mesh = open(mesh_file, "wb")
+
+    # Write Parameters
+    mesh.write(struct.pack('f', float(scan_dimension)))
+    mesh.write(struct.pack('f', float(index_dimension)))
+    mesh.write(struct.pack('f', z_resolution))
+    mesh.write(struct.pack('f', 0.0))
+    mesh.write(struct.pack('f', 0.0))
+    mesh.write(struct.pack('f', 0.0))
+    mesh.write(struct.pack('f', 0.0))
+    mesh.write(struct.pack('f', 0.0))
+
+    # Write Points
+    for point in mesh_points:
+        mesh.write(struct.pack('f', point.X))
+        mesh.write(struct.pack('f', point.Y))
+        mesh.write(struct.pack('f', point.Z))
+        mesh.write(struct.pack('f', point.Gx))
+        mesh.write(struct.pack('f', point.Gy))
+        mesh.write(struct.pack('f', point.Gz))
+        mesh.write(struct.pack('b', True))
+
+    mesh.close()
 
 
 generate_mesh()
