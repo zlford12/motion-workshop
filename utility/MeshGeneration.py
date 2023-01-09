@@ -82,7 +82,7 @@ def generate_mesh():
             current_point.Y = point.Y
             current_point.Z = point.Z
             mesh_points.append(current_point)
-            index_dimension = index_dimension + 1
+        index_dimension = index_dimension + 1
         z_calc = z_calc + z_resolution
 
         for i in range(len(current_line)):
@@ -114,15 +114,14 @@ def generate_mesh():
 
     # Write Points
     for point in mesh_points:
-        mesh.write(struct.pack('f', point.X))
-        mesh.write(struct.pack('f', point.Y))
-        mesh.write(struct.pack('f', point.Z))
-        mesh.write(struct.pack('f', point.Gx))
-        mesh.write(struct.pack('f', point.Gy))
-        mesh.write(struct.pack('f', point.Gz))
+        mesh.write(struct.pack('f', float(point.X)))
+        mesh.write(struct.pack('f', float(point.Y)))
+        mesh.write(struct.pack('f', float(point.Z)))
+        mesh.write(struct.pack('f', float(point.Gx)))
+        mesh.write(struct.pack('f', float(point.Gy)))
+        mesh.write(struct.pack('f', float(point.Gz)))
         mesh.write(struct.pack('b', True))
 
     mesh.close()
 
-
-generate_mesh()
+    print(scan_dimension, index_dimension)

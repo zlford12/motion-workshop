@@ -155,7 +155,7 @@ class Mesh:
         )
         self.generate_mesh_button.configure(
             text="Generate Mesh", width=12, height=2, bg=self.colors[4],
-            command=generate_mesh()
+            command=generate_mesh
         )
 
     def draw_controls(self):
