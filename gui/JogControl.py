@@ -193,11 +193,12 @@ class JogControl:
             unit_string = "mm"
 
         # Update Widgets
-        self.axis_position_label.configure(
-            text=self.axis.axis_data.Name + " \n" +
-            str(round(self.axis.axis_data.Position, 2)) + " " + unit_string,
-            bg=self.colors[0], fg=self.colors[5], justify=LEFT, font=("Arial Black", 12)
-        )
+        if type(self.axis.axis_data.Name) == str:
+            self.axis_position_label.configure(
+                text=self.axis.axis_data.Name + " \n" +
+                str(round(self.axis.axis_data.Position, 2)) + " " + unit_string,
+                bg=self.colors[0], fg=self.colors[5], justify=LEFT, font=("Arial Black", 12)
+            )
 
     def configure_settings(self):
         # Unit

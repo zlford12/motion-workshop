@@ -17,7 +17,7 @@ class ConnectionManagement:
     def is_connected(self):
         if self.connection_desired:
             try:
-                self.client.get_node("i=2253")
+                self.client.get_node("i=2253").get_node_class()
                 self.connection_okay = True
                 return True
 
