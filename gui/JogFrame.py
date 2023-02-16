@@ -49,8 +49,12 @@ class JogFrame:
 
             connected_linked_axis = self.connection_manager.is_connected() and self.motion.link_status and \
                 not self.motion.axis_list[i].axis_data.Linkable and not self.motion.axis_list[i].axis_data.Offset
+
             connected_unlinked_axis = self.connection_manager.is_connected() and not self.motion.link_status and \
-                self.motion.axis_list[i].axis_data.Linkable and not self.motion.axis_list[i].axis_data.Offset
+                (self.motion.axis_list[i].axis_data.Linkable or
+                    self.application_settings.settings["AlwaysShowUnlinkableAxes"] == "True") and \
+                not self.motion.axis_list[i].axis_data.Offset
+
             disconnected = not self.connection_manager.is_connected() and not self.motion.axis_list[i].axis_data.Offset
 
             if connected_linked_axis or connected_unlinked_axis or disconnected:
