@@ -380,19 +380,19 @@ class FileSpline:
             )
 
         # Disable Scan Button
-        if in_scan_mode or (part_in_range and spline_axes_set and self.spline_loaded):
+        if in_scan_mode or (part_in_range and spline_axes_set):
             self.scan_button["state"] = "normal"
         else:
             self.scan_button["state"] = "disable"
 
         # Disable Go To Scan Button
-        if not in_scan_mode and not part_in_range and spline_axes_set and self.spline_loaded:
+        if not in_scan_mode and not part_in_range and spline_axes_set:
             self.go_to_scan_button["state"] = "normal"
         else:
             self.go_to_scan_button["state"] = "disable"
 
         # Disable Scan Controls
-        if in_scan_mode and self.spline_loaded:
+        if in_scan_mode:
             self.forward_button["state"] = "normal"
             self.reverse_button["state"] = "normal"
             self.stop_button["state"] = "normal"
