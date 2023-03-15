@@ -280,7 +280,7 @@ class FileSpline:
         # Read Scan Parameter Node
         node_array: [opcua.Node] = []
         for child in self.c.client.get_node(
-            "ns=2;s=Application.FileSpline_Vars.arSplineValues"
+            "ns=2;s=Application.FileSpline_Vars.arFileSplineValues"
         ).get_children():
             if child.get_data_type_as_variant_type() == ua.VariantType.Double:
                 node_array.append(child)
@@ -290,7 +290,7 @@ class FileSpline:
         self.c.client.set_values(node_array, values_array)
 
         # Enter Scan Mode
-        self.c.client.get_node("ns=2;s=Application.FileSpline_Vars.iSplineCommand") \
+        self.c.client.get_node("ns=2;s=Application.FileSpline_Vars.iFileSplineCommand") \
             .set_value(1, varianttype=ua.VariantType.Int16)
 
     def exit_scan_mode(self):
@@ -300,12 +300,12 @@ class FileSpline:
         )
 
         # Stop Scan
-        self.c.client.get_node("ns=2;s=Application.FileSpline_Vars.iSplineCommand") \
+        self.c.client.get_node("ns=2;s=Application.FileSpline_Vars.iFileSplineCommand") \
             .set_value(2, varianttype=ua.VariantType.Int16)
 
     def go_to_spline(self):
         # Go To Spline
-        self.c.client.get_node("ns=2;s=Application.FileSpline_Vars.iSplineCommand") \
+        self.c.client.get_node("ns=2;s=Application.FileSpline_Vars.iFileSplineCommand") \
             .set_value(4, varianttype=ua.VariantType.Int16)
 
     def set_spline_axes(self):
@@ -336,15 +336,15 @@ class FileSpline:
                 .set_value(7, varianttype=ua.VariantType.Int16)
 
     def spline_scan_forward(self):
-        self.c.client.get_node("ns=2;s=Application.FileSpline_Vars.iSplineCommand")\
+        self.c.client.get_node("ns=2;s=Application.FileSpline_Vars.iFileSplineCommand")\
             .set_value(9, varianttype=ua.VariantType.Int16)
 
     def spline_scan_reverse(self):
-        self.c.client.get_node("ns=2;s=Application.FileSpline_Vars.iSplineCommand")\
+        self.c.client.get_node("ns=2;s=Application.FileSpline_Vars.iFileSplineCommand")\
             .set_value(10, varianttype=ua.VariantType.Int16)
 
     def spline_scan_stop(self):
-        self.c.client.get_node("ns=2;s=Application.FileSpline_Vars.iSplineCommand")\
+        self.c.client.get_node("ns=2;s=Application.FileSpline_Vars.iFileSplineCommand")\
             .set_value(11, varianttype=ua.VariantType.Int16)
 
     def update(self):
