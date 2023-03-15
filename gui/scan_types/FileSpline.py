@@ -329,10 +329,10 @@ class FileSpline:
             for name in current_selection:
                 axis_numbers.append(self.axis_number_from_name(name))
 
-            self.c.client.get_node("ns=2;s=Application.FileSpline_Vars.arSplineValues")\
+            self.c.client.get_node("ns=2;s=Application.FileSpline_Vars.arFileSplineValues")\
                 .set_value(axis_numbers, varianttype=ua.VariantType.Double)
 
-            self.c.client.get_node("ns=2;s=Application.FileSpline_Vars.iSplineCommand")\
+            self.c.client.get_node("ns=2;s=Application.FileSpline_Vars.iFileSplineCommand")\
                 .set_value(7, varianttype=ua.VariantType.Int16)
 
     def spline_scan_forward(self):
@@ -354,13 +354,13 @@ class FileSpline:
         # Check Spline Scan Status
         if self.c.is_connected():
             in_scan_mode = self.c.client.get_node(
-                "ns=2;s=Application.FileSpline_Vars.arSplineOutputs[0]").get_value()
+                "ns=2;s=Application.FileSpline_Vars.arFileSplineOutputs[0]").get_value()
             part_in_range = self.c.client.get_node(
-                "ns=2;s=Application.FileSpline_Vars.arSplineOutputs[1]").get_value()
+                "ns=2;s=Application.FileSpline_Vars.arFileSplineOutputs[1]").get_value()
             scan_mode_failure = self.c.client.get_node(
-                "ns=2;s=Application.FileSpline_Vars.arSplineOutputs[2]").get_value()
+                "ns=2;s=Application.FileSpline_Vars.arFileSplineOutputs[2]").get_value()
             spline_axes_set = self.c.client.get_node(
-                "ns=2;s=Application.FileSpline_Vars.arSplineOutputs[3]").get_value()
+                "ns=2;s=Application.FileSpline_Vars.arFileSplineOutputs[3]").get_value()
         else:
             in_scan_mode = False
             part_in_range = False
