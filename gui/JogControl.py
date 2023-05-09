@@ -74,11 +74,16 @@ class JogControl:
         # Configure Widgets
         pixel = tkinter.PhotoImage(width=1, height=1)
 
+        if self.application_settings.settings["GTKButtons"] == "True":
+            button_width = 1
+        else:
+            button_width = 20
+
         self.jog_negative_button.configure(
-            image=pixel, text="<<", width=20, height=75, compound="c", bg=self.colors[3]
+            image=pixel, text="<<", width=button_width, height=75, compound="c", bg=self.colors[3]
         )
         self.jog_negative_slow_button.configure(
-            image=pixel, text="<", width=20, height=75, compound="c", bg=self.colors[3]
+            image=pixel, text="<", width=button_width, height=75, compound="c", bg=self.colors[3]
         )
         self.axis_position_label.configure(
             text=self.axis.axis_data.Name + " \n" +
@@ -92,10 +97,10 @@ class JogControl:
             text="Go To", width=5, height=1, bg=self.colors[3], command=self.go_to
         )
         self.jog_positive_slow_button.configure(
-            image=pixel, text=">", width=20, height=75, compound="c", bg=self.colors[3]
+            image=pixel, text=">", width=button_width, height=75, compound="c", bg=self.colors[3]
         )
         self.jog_positive_button.configure(
-            image=pixel, text=">>", width=20, height=75, compound="c", bg=self.colors[3]
+            image=pixel, text=">>", width=button_width, height=75, compound="c", bg=self.colors[3]
         )
 
         # Bind Widgets
