@@ -60,8 +60,16 @@ class JogControl:
         else:
             position_unit = "mm"
 
+        # GTK Buttons
+        if self.application_settings.settings["GTKButtons"] == "True":
+            button_width = 1
+            subframe_width = 500
+        else:
+            button_width = 20
+            subframe_width = 400
+
         # Configure Frames
-        self.subframe.configure(bg=self.colors[0], width=400, height=95)
+        self.subframe.configure(bg=self.colors[0], width=subframe_width, height=95)
         self.settings_canvas.configure(bg=self.colors[0], width=50, height=95, highlightthickness=0)
         self.settings_canvas.create_text(
             25, 50, text="Settings", angle=90, fill=self.colors[5], font=("Arial Black", 10)
@@ -73,11 +81,6 @@ class JogControl:
 
         # Configure Widgets
         pixel = tkinter.PhotoImage(width=1, height=1)
-
-        if self.application_settings.settings["GTKButtons"] == "True":
-            button_width = 1
-        else:
-            button_width = 20
 
         self.jog_negative_button.configure(
             image=pixel, text="<<", width=button_width, height=75, compound="c", bg=self.colors[3]
