@@ -1,5 +1,6 @@
 from tkinter import *
 from gui.scan_types.FileSpline import FileSpline
+from gui.scan_types.LIDAR import LIDAR
 from gui.scan_types.Mesh import Mesh
 from gui.scan_types.NoScan import NoScan
 from gui.scan_types.P2P import P2P
@@ -40,7 +41,8 @@ class ScanFrame:
             "Spline": Spline,
             "Shaft": Shaft,
             "Mesh": Mesh,
-            "FileSpline": FileSpline
+            "FileSpline": FileSpline,
+            "LIDAR": LIDAR
         }
 
     def draw(self):
