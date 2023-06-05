@@ -100,7 +100,8 @@ class LIDAR:
 
         # Configure Widgets
         self.start_button.configure(
-            text="Start Scan", width=24, height=2, bg=self.colors[4]
+            text="Start Scan", width=24, height=2, bg=self.colors[4],
+            command=lambda: self.start_scan()
         )
         self.pps_label.configure(
             text="Points\nPer Scan", bg=self.colors[3], font=label_font, justify=LEFT
@@ -194,7 +195,7 @@ class LIDAR:
             text="Z Axis", bg=self.colors[3], font=label_font, justify=LEFT
         )
         self.axis_3_label.configure(
-            text="Gimbal", bg=self.colors[3], font=label_font, justify=LEFT
+            text="Water Path", bg=self.colors[3], font=label_font, justify=LEFT
         )
         self.axis_4_label.configure(
             text="Gimbal", bg=self.colors[3], font=label_font, justify=LEFT
@@ -435,6 +436,13 @@ class LIDAR:
         values_array[27] = float(self.axis_number_from_name(self.axis_7_selection.get()))
         values_array[28] = float(self.axis_number_from_name(self.axis_8_selection.get()))
         values_array[29] = float(self.axis_number_from_name(self.axis_9_selection.get()))
+
+        # Write Scan Parameters
+        self.c.client.set_values(node_array, values_array)
+
+        # Start Scan
+        self.c.client.get_node("ns=2;s=Application.LIDAR_Vars.iLIDARCommand") \
+            .set_value(1, varianttype=ua.VariantType.Int16)
 
     def axis_number_from_name(self, name: str):
         number = 0
