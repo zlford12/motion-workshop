@@ -128,7 +128,7 @@ class LIDAR:
             width=entry_width
         )
         self.min_density_label.configure(
-            text="Minimum\nDensity (mm)", bg=self.colors[3], font=label_font, justify=LEFT
+            text="Minimum\nDensity (%)", bg=self.colors[3], font=label_font, justify=LEFT
         )
         self.min_density_entry.configure(
             width=entry_width
