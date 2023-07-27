@@ -309,8 +309,10 @@ class Mesh:
 
         if "ata0b" in ftp.nlst():
             ftp.cwd("ata0b")
-        elif "USER" in ftp.nlst():
-            ftp.cwd("USER")
+        elif "REMOVABLE_USB_A" in ftp.nlst():
+            ftp.cwd("REMOVABLE_USB_A")
+        #elif "USER" in ftp.nlst():
+        #    ftp.cwd("USER")
         else:
             messagebox.showerror(
                 title="FTP Error",
@@ -319,7 +321,7 @@ class Mesh:
             return
 
         try:
-            ftp.storbinary("STOR mesh_data", open(mesh_file, "rb"))
+            ftp.storbinary("STOR mesh.bin", open(mesh_file, "rb"))
         except Exception as e:
             print(e)
             messagebox.showerror(
