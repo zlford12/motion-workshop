@@ -4,6 +4,7 @@ from opcua import ua
 from motion.Motion import Motion
 from motion.Axis import Axis
 import struct
+import time
 from utility.ApplicationSettings import ApplicationSettings
 from utility.ConnectionManagement import ConnectionManagement
 
@@ -491,10 +492,15 @@ class JogControl:
                     "ns=2;s=Application.MNDT_Vars.arValues[3]"
                 ).set_value(deceleration_input, varianttype=ua.VariantType.Double)
 
+                limit_update_delay = 0.050
+
+                time.sleep(limit_update_delay)
                 self.motion.commands.command(self.connection_manager, "SetAxisLimits")
 
+                time.sleep(limit_update_delay)
                 self.motion.commands.command(self.connection_manager, "ReloadAxisInfo")
 
+                time.sleep(limit_update_delay)
                 self.motion.update(self.connection_manager)
 
         # Draw Controls
