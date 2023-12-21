@@ -1,6 +1,7 @@
 from tkinter import *
 from tkinter import ttk
 from motion.Motion import Motion
+import opcua.ua
 from utility.ConnectionManagement import ConnectionManagement
 from utility.ApplicationSettings import ApplicationSettings
 
@@ -30,6 +31,10 @@ class AxisStatus:
         # Widgets
         self.plc_status = Label(self.axis_status_canvas)
         self.axis_status = [(Label(self.axis_status_canvas), int(0))]
+
+        # Controller Compatibility
+        self.failure_count = 0
+        self.controller_incompatible = False
 
     def draw(self):
         self.axis_status_tab_frame.rowconfigure(0, weight=1)
@@ -76,6 +81,10 @@ class AxisStatus:
         self.axis_status_canvas.bind("Configure", self.update_status_labels())
 
     def update_status_labels(self):
+
+        if self.controller_incompatible:
+            return
+
         try:
             text = self.connection_manager.node_list.plc_status.get_value()
             self.plc_status.configure(text=text)
@@ -98,8 +107,16 @@ class AxisStatus:
 
                     label.configure(text=name + ": " + text, justify=LEFT)
 
-        except Exception as e:
-            print(e)
+            self.failure_count = 0
+
+        except opcua.ua.UaStatusCodeError:
+            self.failure_count += 1
+
+            if self.failure_count >= 5:
+                self.controller_incompatible = True
+
+                for label, axis_number in self.axis_status:
+                    label.configure(text="Controller Incompatible. Status Not Available", justify=LEFT)
 
         self.axis_status_canvas.configure(
             width=self.axis_status_frame.winfo_width()
