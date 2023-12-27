@@ -1,5 +1,6 @@
 from tkinter import *
 from gui.scan_types.FileSpline import FileSpline
+from gui.scan_types.Helical import Helical
 from gui.scan_types.LIDAR import LIDAR
 from gui.scan_types.Mesh import Mesh
 from gui.scan_types.NoScan import NoScan
@@ -42,7 +43,8 @@ class ScanFrame:
             "Shaft": Shaft,
             "Mesh": Mesh,
             "FileSpline": FileSpline,
-            "LIDAR": LIDAR
+            "LIDAR": LIDAR,
+            "Helical": Helical
         }
 
     def draw(self):
