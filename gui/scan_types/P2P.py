@@ -42,7 +42,7 @@ class P2P:
         self.axes = self.m.axis_list
         self.axis_names = ["None"]
         for axis in self.axes:
-            if not axis.axis_data.Offset and not axis.axis_data.Linkable and not axis.axis_data.ScanAxis:
+            if axis.axis_data.ScanAxis:
                 self.axis_names.append(axis.axis_data.Name)
 
         # Axis Labels
