@@ -57,6 +57,7 @@ class JogControl:
         self.step_jog_tick = Checkbutton(self.subframe)
         self.step_size_label = Label(self.subframe)
         self.step_size_entry = Entry(self.subframe)
+        self.step_size_cache = 0.0
 
     # noinspection PyTypeChecker
     def configure_controls(self):
@@ -356,6 +357,8 @@ class JogControl:
         self.acceleration_entry.insert(0, self.axis.axis_limits.SetAcceleration)
         self.deceleration_entry.delete(0, 'end')
         self.deceleration_entry.insert(0, self.axis.axis_limits.SetDeceleration)
+        self.step_size_entry.delete(0, 'end')
+        self.step_size_entry.insert(0, str(self.step_size_cache))
 
     # noinspection PyTypeChecker
     def jog_positive(self, button_state, speed: int):
@@ -526,7 +529,8 @@ class JogControl:
                 self.motion.update(self.connection_manager)
 
             # Update Step Jog
-            if self.step_jog_state.get() != self.step_jog_cache.get():
+            if (self.step_jog_state.get() != self.step_jog_cache.get()) or\
+                    (float(self.step_size_entry.get()) != float(self.step_size_cache)):
                 self.step_jog_cache.set(self.step_jog_state.get())
 
                 i = self.axis.axis_data.AxisNo
