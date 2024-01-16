@@ -52,6 +52,11 @@ class JogControl:
         self.deceleration_label = Label(self.subframe)
         self.deceleration_entry = Entry(self.subframe)
         self.deceleration_unit = Label(self.subframe)
+        self.step_jog_state = IntVar()
+        self.step_jog_cache = IntVar()
+        self.step_jog_tick = Checkbutton(self.subframe)
+        self.step_size_label = Label(self.subframe)
+        self.step_size_entry = Entry(self.subframe)
 
     # noinspection PyTypeChecker
     def configure_controls(self):
@@ -219,7 +224,7 @@ class JogControl:
             acceleration_unit = "mm/s^2"
 
         # Configure Frames
-        self.subframe.configure(bg=self.colors[0], width=400, height=95)
+        self.subframe.configure(bg=self.colors[0], width=500, height=95)
         self.settings_canvas.configure(bg=self.colors[0], width=50, height=95, highlightthickness=0)
         self.settings_canvas.create_text(25, 600, text="Exit", angle=90, fill=self.colors[5])
         self.subframe.columnconfigure(2, weight=0)
@@ -274,6 +279,18 @@ class JogControl:
             bg=self.colors[0], fg=self.colors[5], justify=LEFT, font=label_font
         )
 
+        self.step_jog_tick.configure(
+            text="Enable\nStep Jog", variable=self.step_jog_state,
+            onvalue=1, offvalue=0, bg=self.colors[0], fg=self.colors[5], font=label_font
+        )
+        self.step_size_label.configure(
+            text="Step Size",
+            bg=self.colors[0], fg=self.colors[5], justify=LEFT, font=label_font
+        )
+        self.step_size_entry.configure(
+            width=entry_width, bg=self.colors[3], font=entry_font
+        )
+
         # Bind Widgets
         self.settings_canvas.bind(
             "<Enter>", lambda state: self.recolor_settings(True)
@@ -326,6 +343,9 @@ class JogControl:
         self.deceleration_label.grid(row=2, column=2, columnspan=2, padx=x, pady=(y, 0), sticky=W)
         self.deceleration_entry.grid(row=3, column=2, padx=x, pady=y, sticky=W)
         self.deceleration_unit.grid(row=3, column=3, padx=x, pady=y, sticky=W)
+        self.step_jog_tick.grid(row=0, rowspan=2, column=4, padx=x, pady=y, sticky=W)
+        self.step_size_label.grid(row=2, column=4, padx=x, pady=y, sticky=W)
+        self.step_size_entry.grid(row=3, column=4, padx=x, pady=y, sticky=W)
 
         # Populate Entry Widgets
         self.name_entry.delete(0, 'end')
@@ -409,6 +429,8 @@ class JogControl:
 
     def apply_settings(self):
         if self.connection_manager.is_connected():
+            client = self.connection_manager.client
+
             # Update Name
             if self.name_entry.get() != self.axis.axis_data.Name and self.name_entry.get() != "":
                 name_input = self.name_entry.get()
@@ -439,11 +461,11 @@ class JogControl:
                     float_value = struct.unpack('d', values[i])[0]
 
                     # Send To PLC
-                    self.connection_manager.client.get_node(
+                    client.get_node(
                         "ns=2;s=Application.MNDT_Vars.arValues[" + str(i + 1) + "]"
                     ).set_value(float_value, varianttype=ua.VariantType.Double)
 
-                self.connection_manager.client.get_node(
+                client.get_node(
                     "ns=2;s=Application.MNDT_Vars.arValues[0]"
                 ).set_value(float(self.axis.axis_data.AxisNo), varianttype=ua.VariantType.Double)
 
@@ -476,19 +498,19 @@ class JogControl:
                     deceleration_input = min(float(self.deceleration_entry.get()),
                                              self.axis.axis_limits.MaxDeceleration)
 
-                self.connection_manager.client.get_node(
+                client.get_node(
                     "ns=2;s=Application.MNDT_Vars.arValues[0]"
                 ).set_value(float(self.axis.axis_data.AxisNo), varianttype=ua.VariantType.Double)
 
-                self.connection_manager.client.get_node(
+                client.get_node(
                     "ns=2;s=Application.MNDT_Vars.arValues[1]"
                 ).set_value(velocity_input, varianttype=ua.VariantType.Double)
 
-                self.connection_manager.client.get_node(
+                client.get_node(
                     "ns=2;s=Application.MNDT_Vars.arValues[2]"
                 ).set_value(acceleration_input, varianttype=ua.VariantType.Double)
 
-                self.connection_manager.client.get_node(
+                client.get_node(
                     "ns=2;s=Application.MNDT_Vars.arValues[3]"
                 ).set_value(deceleration_input, varianttype=ua.VariantType.Double)
 
@@ -502,6 +524,18 @@ class JogControl:
 
                 time.sleep(limit_update_delay)
                 self.motion.update(self.connection_manager)
+
+            # Update Step Jog
+            if self.step_jog_state.get() != self.step_jog_cache.get():
+                self.step_jog_cache.set(self.step_jog_state.get())
+
+                i = self.axis.axis_data.AxisNo
+                client.get_node(
+                    "ns=2;s=Application.MNDT_Vars.arStepJog[" + str(i) + "]"
+                ).set_value(bool(self.step_jog_state.get()))
+                client.get_node(
+                    "ns=2;s=Application.MNDT_Vars.arStepSize[" + str(i) + "]"
+                ).set_value(float(self.step_size_entry.get()))
 
         # Draw Controls
         self.draw_controls(self.row, self.column)
