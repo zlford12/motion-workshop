@@ -535,7 +535,7 @@ class JogControl:
                 ).set_value(bool(self.step_jog_state.get()))
                 client.get_node(
                     "ns=2;s=Application.MNDT_Vars.arStepSize[" + str(i) + "]"
-                ).set_value(float(self.step_size_entry.get()))
+                ).set_value(float(self.step_size_entry.get()), varianttype=ua.VariantType.Float)
 
         # Draw Controls
         self.draw_controls(self.row, self.column)
