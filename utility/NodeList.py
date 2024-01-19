@@ -22,7 +22,7 @@ class NodeList:
         # Axis Data
         self.axis_data = [[]]
         for child in client.get_node("ns=2;s=Application.MNDT_Vars.arMNDTAxisData").get_children():
-            if str(child.get_node_class()) == "NodeClass.Object":
+            if str(child.get_node_class()) == "NodeClass.Object" or child.get_node_class() == 1:
                 structure = []
                 for node in child.get_children():
                     structure.append(node)
@@ -31,7 +31,7 @@ class NodeList:
         # Axis Limits
         self.axis_limits = [[]]
         for child in client.get_node("ns=2;s=Application.PersistentVars.arMNDTAxisLimits").get_children():
-            if str(child.get_node_class()) == "NodeClass.Object":
+            if str(child.get_node_class()) == "NodeClass.Object" or child.get_node_class() == 1:
                 structure = []
                 for node in child.get_children():
                     structure.append(node)
