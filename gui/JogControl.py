@@ -1,5 +1,6 @@
 import tkinter
 from tkinter import *
+from tkinter import messagebox
 from opcua import ua
 from motion.Motion import Motion
 from motion.Axis import Axis
@@ -58,6 +59,9 @@ class JogControl:
         self.step_size_label = Label(self.subframe)
         self.step_size_entry = Entry(self.subframe)
         self.step_size_cache = 0.0
+
+        # Persistent Warning
+        self.persistent_warning = False
 
     # noinspection PyTypeChecker
     def configure_controls(self):
@@ -364,9 +368,10 @@ class JogControl:
     def jog_positive(self, button_state, speed: int):
         if self.connection_manager.is_connected():
             client = self.connection_manager.client
+            multiplier = self.check_jog_multiplier(button_state)
             i = self.axis.axis_data.AxisNo
             client.get_node(
-                "ns=2;s=Application.PersistentVars.iJogMultiplierIndex"
+                multiplier
             ).set_value(speed, varianttype=ua.VariantType.Int16)
             client.get_node(
                 "ns=2;s=Application.MNDT_Vars.arJogPositive[" + str(i) + "]"
@@ -389,9 +394,10 @@ class JogControl:
     def jog_negative(self, button_state, speed: int):
         if self.connection_manager.is_connected():
             client = self.connection_manager.client
+            multiplier = self.check_jog_multiplier(button_state)
             i = self.axis.axis_data.AxisNo
             client.get_node(
-                "ns=2;s=Application.PersistentVars.iJogMultiplierIndex"
+                multiplier
             ).set_value(speed, varianttype=ua.VariantType.Int16)
             client.get_node(
                 "ns=2;s=Application.MNDT_Vars.arJogNegative[" + str(i) + "]"
@@ -413,9 +419,10 @@ class JogControl:
     def go_to(self):
         if self.connection_manager.is_connected():
             client = self.connection_manager.client
+            multiplier = self.check_jog_multiplier()
             i = self.axis.axis_data.AxisNo
             client.get_node(
-                "ns=2;s=Application.PersistentVars.iJogMultiplierIndex"
+                multiplier
             ).set_value(2, varianttype=ua.VariantType.Int16)
             client.get_node(
                 "ns=2;s=Application.MNDT_Vars.arGoToPosition[" + str(i) + "]"
@@ -543,3 +550,18 @@ class JogControl:
 
         # Draw Controls
         self.draw_controls(self.row, self.column)
+
+    def check_jog_multiplier(self, start_jog: bool = False):
+        if self.connection_manager.is_connected():
+            client = self.connection_manager.client
+            try:
+                client.get_node(
+                    "ns=2;s=Application.PersistentVars.iJogMultiplierIndex"
+                ).get_value()
+            except ua.UaStatusCodeError:
+                if not self.persistent_warning and not start_jog:
+                    messagebox.showwarning(message="PLC Using Volatile Multiplier Index. Move To Persistent Vars.")
+                    self.persistent_warning = True
+                return "ns=2;s=Application.MNDT_Vars.iJogMultiplierIndex"
+
+        return "ns=2;s=Application.PersistentVars.iJogMultiplierIndex"
