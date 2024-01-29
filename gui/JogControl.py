@@ -366,7 +366,7 @@ class JogControl:
             client = self.connection_manager.client
             i = self.axis.axis_data.AxisNo
             client.get_node(
-                "ns=2;s=Application.MNDT_Vars.iJogMultiplierIndex"
+                "ns=2;s=Application.PersistentVars.iJogMultiplierIndex"
             ).set_value(speed, varianttype=ua.VariantType.Int16)
             client.get_node(
                 "ns=2;s=Application.MNDT_Vars.arJogPositive[" + str(i) + "]"
@@ -391,7 +391,7 @@ class JogControl:
             client = self.connection_manager.client
             i = self.axis.axis_data.AxisNo
             client.get_node(
-                "ns=2;s=Application.MNDT_Vars.iJogMultiplierIndex"
+                "ns=2;s=Application.PersistentVars.iJogMultiplierIndex"
             ).set_value(speed, varianttype=ua.VariantType.Int16)
             client.get_node(
                 "ns=2;s=Application.MNDT_Vars.arJogNegative[" + str(i) + "]"
@@ -415,7 +415,7 @@ class JogControl:
             client = self.connection_manager.client
             i = self.axis.axis_data.AxisNo
             client.get_node(
-                "ns=2;s=Application.MNDT_Vars.iJogMultiplierIndex"
+                "ns=2;s=Application.PersistentVars.iJogMultiplierIndex"
             ).set_value(2, varianttype=ua.VariantType.Int16)
             client.get_node(
                 "ns=2;s=Application.MNDT_Vars.arGoToPosition[" + str(i) + "]"
