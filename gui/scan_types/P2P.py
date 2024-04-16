@@ -42,8 +42,7 @@ class P2P:
         self.axes = self.m.axis_list
         self.axis_names = ["None"]
         for axis in self.axes:
-            if axis.axis_data.ScanAxis:
-                self.axis_names.append(axis.axis_data.Name)
+            self.axis_names.append(axis.axis_data.Name)
 
         # Axis Labels
         self.axis_0_label = Label(self.control_frame)
